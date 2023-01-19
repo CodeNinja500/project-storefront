@@ -1,0 +1,92 @@
+// slick
+
+// hero slider in slick
+.slick-slider {
+  .slick-slide {
+    margin-right: 0.75rem;
+  }
+
+  img {
+    display: inline-block;
+  }
+
+  .slick-prev:before,
+  .slick-next:before {
+    font-family: "slick";
+    font-size: 20px;
+    line-height: 1;
+    opacity: 0.75;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: none;
+  }
+
+  .slick-prev,
+  .slick-next {
+    font-size: 20px;
+    line-height: 0;
+    position: absolute;
+    top: 0;
+    left: 97%;
+    display: block;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    -webkit-transform: translate(0, -50%);
+    -ms-transform: translate(0, -50%);
+    transform: translate(0, -50%);
+    cursor: pointer;
+    color: $dark;
+    border: none;
+    outline: none;
+    background: $light;
+    border-radius: 50px;
+
+    @media (max-width: 1024px) {
+      left: 94%;
+    }
+    @media (max-width: 390px) {
+      left: 87%;
+    }
+  }
+
+  .slick-prev {
+    &:hover,
+    &:focus {
+      color: $white;
+      outline: none;
+      background: $primary;
+    }
+  }
+  .slick-next {
+    &:hover,
+    &:focus {
+      color: $white;
+      outline: none;
+      background: $primary;
+    }
+
+    margin-top: -35px;
+  }
+
+  .slick-prev {
+    margin-top: -35px;
+    margin-left: -35px;
+  }
+}
+
+// team slider
+.team-slider {
+  .slick-prev,
+  .slick-next {
+    top: -34px;
+    left: 76%;
+    @media (max-width: 1024px) {
+      left: 80%;
+    }
+    @media (max-width: 390px) {
+      left: 87%;
+    }
+  }
+}

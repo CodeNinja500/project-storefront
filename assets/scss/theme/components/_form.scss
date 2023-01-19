@@ -1,0 +1,64 @@
+// form
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.form-switch {
+  display: flex;
+  align-items: center;
+
+  .form-check-input {
+    height: 1.6em;
+    width: 3em;
+    border-color: $gray-200;
+    margin-right: 0.5rem;
+  }
+}
+
+.form-focus-none {
+  &.form-control {
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+  &.form-select {
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+}
+
+// input spinner
+
+.input-spinner{
+  .button-minus, .button-plus{
+    height: 2rem;
+    width:1.8rem;
+    border-color: $gray-200;
+    background-color: transparent;
+    &:hover{
+      background-color: $gray-200;
+      border-color: $gray-200;
+  
+    }
+    
+  }
+  .form-input{
+    width: 2rem !important;
+  
+      height: 100%;
+      min-height: 2rem;
+      text-align: center;
+      border: 1px solid $gray-200;
+      background: 0 0;
+  }
+
+}
+
+
+

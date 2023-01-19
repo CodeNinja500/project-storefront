@@ -1,0 +1,26 @@
+// footer
+
+.footer {
+    background-color: $light;
+    padding: 4rem 0;
+    .nav {
+        .nav-item {
+            .nav-link {
+                color: $gray-600;
+                padding: 0;
+                &:hover {
+                    color: $primary;
+                }
+            }
+        }
+    }
+    .social-links {
+        color: $gray-500;
+        border: 1px solid $gray-500;
+        border-radius: 0.5rem;
+        &:hover {
+            color: $primary;
+            border: 1px solid $primary;
+        }
+    }
+}

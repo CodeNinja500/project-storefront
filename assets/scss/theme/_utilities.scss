@@ -1,0 +1,162 @@
+//
+// utilities.scss
+// Extended from Bootstrap
+//
+
+$utilities: () !default;
+
+$utilities: map-merge(
+  $utilities,
+  (
+    "border": (
+      property: border,
+      responsive: true,
+      values: (
+        null: var(--#{$prefix}border-width) var(--#{$prefix}border-style) var(--#{$prefix}border-color),
+        0: 0,
+      ),
+    ),
+    "border-start": (
+      property: border-left,
+      class: border-start,
+      responsive: true,
+      values: (
+        null: var(--#{$prefix}border-width) var(--#{$prefix}border-style) var(--#{$prefix}border-color),
+        0: 0,
+      ),
+    ),
+    "border-end": (
+      property: border-right,
+      class: border-end,
+      responsive: true,
+      values: (
+        null: var(--#{$prefix}border-width) var(--#{$prefix}border-style) var(--#{$prefix}border-color),
+        0: 0,
+      ),
+    ),
+    "border-top": (
+      property: border-top,
+      class: border-top,
+      responsive: true,
+      values: (
+        null: var(--#{$prefix}border-width) var(--#{$prefix}border-style) var(--#{$prefix}border-color),
+        0: 0,
+      ),
+    ),
+    "border-bottom": (
+      property: border-bottom,
+      class: border-bottom,
+      responsive: true,
+      values: (
+        null: var(--#{$prefix}border-width) var(--#{$prefix}border-style) var(--#{$prefix}border-color),
+        0: 0,
+      ),
+    ),
+    "width": (
+      property: width,
+      responsive: true,
+      class: w,
+      values: (
+        0: 0%,
+        5: 5%,
+        10: 10%,
+        15: 15%,
+        20: 20%,
+        25: 25%,
+        30: 30%,
+        40: 40%,
+        45: 45%,
+        50: 50%,
+        65: 65%,
+        75: 75%,
+        100: 100%,
+        auto: auto,
+      ),
+    ),
+    "position": (
+      property: position,
+      values: static relative absolute fixed sticky,
+      responsive: true,
+    ),
+  
+    "top": (
+      property: top,
+      values: $position-values,
+      responsive: true,
+    ),
+    "bottom": (
+      property: bottom,
+      values: $position-values,
+      responsive: true,
+    ),
+    "start": (
+      property: left,
+      class: start,
+      values: $position-values,
+      responsive: true,
+    ),
+    "end": (
+      property: right,
+      class: end,
+      values: $position-values,
+      responsive: true,
+    ),
+    "background-color": (
+      property: background-color,
+      class: bg,
+      responsive: true,
+      local-vars: (
+        "bg-opacity": 1,
+      ),
+      values:
+        map-merge(
+          $utilities-bg-colors,
+          (
+            "gray-100": $gray-100,
+            "gray-200": $gray-200,
+            "gray-300": $gray-300,
+            "gray-400": $gray-400,
+            "gray-500": $gray-500,
+            "gray-600": $gray-600,
+            "gray-700": $gray-700,
+            "gray-800": $gray-800,
+            "gray-900": $gray-900,
+            "body": $body-bg,
+            "white": $white,
+            "transparent": transparent,
+          )
+        ),
+    ),
+    "visibility": (
+      property: visibility,
+      class: visibility,
+      responsive: true,
+      
+      values: (
+        visible: visible,
+        invisible: hidden,
+      ),
+      
+    ),
+    "z-index": (
+      property: z-index,
+      class: z,
+      values: (
+        -1: -1,
+        0: 0,
+        1: 1,
+        2: 2,
+        3: 3,
+        4: 4,
+        5: 5,
+      ),
+    ),
+  )
+);
+
+// Utilities classes
+@import "./utilities/_text.scss";
+@import "./utilities/_icon-shape.scss";
+@import "./utilities/_border.scss";
+@import "./utilities/_img-zoom.scss";
+@import "./utilities/_simplebar.scss";
