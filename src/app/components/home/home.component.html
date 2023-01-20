@@ -1,0 +1,106 @@
+<!--CATEGORIES SECTION-->
+<section class="my-lg-14 my-8">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="mb-6">
+                    <h4>Shop by Category</h4>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div *ngFor="let category of categoryList$ | async" class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <a [routerLink]="'/categories/'+ category.id" class="text-decoration-none text-inherit">
+                    <!-- card -->
+                    <div class="card card-product mb-3">
+                        <div class="card-body text-center py-8">
+                            <!-- img -->
+                            <img [src]="category.imageUrl" [alt]="" class="mb-3">
+                            <!-- text -->
+                            <div class="text-truncate">{{category.name}}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--FEATURED CATEGORIES WITH PRODUCTS SECTION-->
+
+<section class="my-lg-14 my-8">
+    <div class="container">
+        <ng-container *ngFor="let featuredCategory of featuredCategoryListWithProducts$|async">
+            <div class="row my-8">
+                <div class="col-12">
+                    <div class="mb-6">
+                        <h4>{{featuredCategory.name}}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="row row-cols-lg-5 row-cols-sm-3 row-cols-2">
+                <div *ngFor="let product of featuredCategory.products" class="col my-3"><a [routerLink]=""
+                        class="text-decoration-none text-inherit"><!-- card -->
+                        <div class="card card-product">
+                            <div class="card-body text-start py-8"><!-- img --><img [src]="product.imageUrl" [alt]=""
+                                    class="mb-3 img-fluid"><!-- text -->
+                                <div class="text-truncate">{{product.name}}</div>
+                                <div class="text-truncate mt-3">{{product.price|currency}}</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </ng-container>
+
+    </div>
+</section>
+
+<!--STORES SECTION-->
+
+<section class="my-lg-14 my-8">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="mb-6">
+                    <h4>Stores</h4>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <ng-container *ngIf="storeList$ | async as stores">
+                <div class="col-12">
+                    <div class="mb-4">
+                        <h6>We have <span class="text-primary">{{stores.length}}</span> vendors now</h6>
+                    </div>
+                </div>
+                <div *ngFor="let store of storeList$ | async" class="col-12 col-sm-6 col-lg-4">
+                    <a class="card flex-row p-8 card-product mb-3" [routerLink]="'/stores/'+ store.id">
+                        <div>
+                            <img [src]="store.logoUrl" [alt]="store" class="rounded-circle icon-shape icon-xl">
+                        </div>
+                        <div class="ms-6">
+                            <h5 class="mb-1"><a [routerLink]="'/stores/'+ store.id" class="text-inherit">{{store.name}}</a></h5>
+                            <div class="small text-muted">
+                                <ng-container *ngFor="let tag of store.tags; last as last">
+                                    <span>{{tag}}</span>
+                                    <!-- <span *ngIf="!last" class="mx-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" fill="#C1C7C6"
+                                            class="bi bi-circle-fill align-middle " viewBox="0 0 16 16">
+                                            <circle cx="8" cy="8" r="8" />
+                                        </svg>
+                                    </span> -->
+                                </ng-container>
+                            </div>
+                            <div>
+                                <!-- badge -->
+                                <div class="badge text-bg-light border">{{store.distanceInKm}} km</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </ng-container>
+        </div>
+
+    </div>
+</section>
