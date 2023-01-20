@@ -50,8 +50,5 @@ export class StoreProductsComponent {
     };
   }
 
-  onStoreSearchSubmitted(storeSearch: FormGroup): void {
-    //for debugging
-    console.log('Searching for products with keyWord: ' + storeSearch.value.keyWord);
-  }
+  onStoreSearchSubmitted(storeSearch: FormGroup): void {}
 }
