@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, combineLatest } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
 import { filter, map, shareReplay, switchMap } from 'rxjs/operators';
 import { TagModel } from '../../models/tag.model';
 import { StoreQueryModel } from '../../query-models/store.query-model';
@@ -19,6 +19,9 @@ import { StoreModel } from '../../models/store.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StoreProductsComponent {
+  private _keyWordForSearchSubject: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  public keyWordForSearch$: Observable<string> = this._keyWordForSearchSubject.asObservable();
+
   readonly storeId$: Observable<string> = this._activatedRoute.params.pipe(
     map((params) => params['storeId']),
     shareReplay(1)
@@ -31,13 +34,20 @@ export class StoreProductsComponent {
     )
   );
 
-  readonly productsInStoreList$: Observable<ProductModel[]> = this.storeId$.pipe(
-    switchMap((storeId) =>
+  readonly productsInStoreList$: Observable<ProductModel[]> = combineLatest([
+    this.keyWordForSearch$,
+    this.storeId$
+  ]).pipe(
+    switchMap(([keyWord, storeId]) =>
       this._productsService
         .getAllProducts()
         .pipe(
           map((products) =>
-            products.filter((product) => product.storeIds.some((productStoreId) => productStoreId === storeId))
+            products.filter((product) =>
+              product.storeIds.some(
+                (productStoreId) => productStoreId === storeId && product.name.toLowerCase().includes(keyWord)
+              )
+            )
           )
         )
     )
@@ -65,5 +75,11 @@ export class StoreProductsComponent {
   onStoreSearchSubmitted(storeSearch: FormGroup): void {
     //for debugging
     console.log('Searching for products with keyWord: ' + storeSearch.value.keyWord);
+    this._keyWordForSearchSubject.next(storeSearch.value.keyWord.toLowerCase());
+  }
+
+  onDeleteSearchButtonClick(): void {
+    this._keyWordForSearchSubject.next('');
+    this.storeSearch.setValue({ keyWord: '' });
   }
 }

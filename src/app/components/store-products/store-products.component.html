@@ -39,7 +39,19 @@
                                 </svg>
                             </span>
                             <!--for debugging-->
-                            <p>{{storeSearch.value |json}}</p>
+                            <ng-container *ngIf="keyWordForSearch$|async as keyWord">
+                                <ng-container *ngIf="keyWord.length>0">
+                                    <div class="hstack gap-2 mt-3">
+                                        <span class="badge rounded-pill bg-secondary fs-6">
+                                            Searching for {{keyWord}}
+                                        </span>
+                                        <button type="button" class="btn-close" aria-label="Close"
+                                            (click)="onDeleteSearchButtonClick()"></button>
+                                    </div>
+
+                                </ng-container>
+                            </ng-container>
+
 
                         </div>
                     </div>
