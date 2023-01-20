@@ -1,8 +1,9 @@
-<section class="my-lg-14 my-8">
-    <div class="container">
-        <div class='row'>
-            <!--STORE INFORMATION ND SEARCH-->
-            <ng-container *ngIf="storeDetails$ | async as store">
+<ng-container *ngIf="storeDetails$ | async as store">
+    <section class="my-lg-8 my-4">
+        <div class="container">
+            <div class='row'>
+                <!--STORE INFORMATION ND SEARCH-->
+
                 <!--STORE INFO-->
                 <div class="col-12 col-md-3 p-6">
                     <div class="d-flex flex-column">
@@ -46,7 +47,33 @@
                         <img src="../assets/images/svg-graphics/store-graphics.svg" alt="" class="img-fluid">
                     </div>
                 </div>
-            </ng-container>
+
+            </div>
         </div>
-    </div>
-</section>
+    </section>
+
+    <!--PRODUCT LIST-->
+    <section class="my-lg-8 my-4">
+        <div class="container">
+            <!--HEADER ROW-->
+            <div class="col-12 mb-6">
+                <h4 class="mb-1">{{store.name}} products:</h4>
+            </div>
+            <div class='row row-cols-2 row-cols-xl-6 row-cols-md-3 g-4'>
+                <div *ngFor="let product of productsInStoreList$ | async" class="col">
+                    <a [routerLink]="" class="text-decoration-none text-inherit">
+                        <!-- card -->
+                        <div>
+                            <div class="card-body text-center py-4">
+                                <!-- img -->
+                                <img [src]="product.imageUrl" [alt]="product.name" class="mb-3 img-fluid">
+                                <!-- text -->
+                                <div class="text-truncate">{{product.name}}</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</ng-container>

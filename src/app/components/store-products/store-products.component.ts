@@ -31,6 +31,18 @@ export class StoreProductsComponent {
     )
   );
 
+  readonly productsInStoreList$: Observable<ProductModel[]> = this.storeId$.pipe(
+    switchMap((storeId) =>
+      this._productsService
+        .getAllProducts()
+        .pipe(
+          map((products) =>
+            products.filter((product) => product.storeIds.some((productStoreId) => productStoreId === storeId))
+          )
+        )
+    )
+  );
+
   readonly storeSearch: FormGroup = new FormGroup({ keyWord: new FormControl() });
 
   constructor(
