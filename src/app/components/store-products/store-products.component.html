@@ -1,0 +1,52 @@
+<section class="my-lg-14 my-8">
+    <div class="container">
+        <div class='row'>
+            <!--STORE INFORMATION ND SEARCH-->
+            <ng-container *ngIf="storeDetails$ | async as store">
+                <!--STORE INFO-->
+                <div class="col-12 col-md-3 p-6">
+                    <div class="d-flex flex-column">
+                        <div>
+                            <!-- img -->
+                            <img [src]="store.logoUrl" alt="" class="rounded-circle icon-shape icon-xxl">
+                        </div>
+                        <!-- heading -->
+                        <div class="mt-4">
+                            <h1 class="mb-1 h4">{{store.name}}</h1>
+                            <div class="small text-muted">
+                                <span>It is only <span class="text-primary">{{store.distanceInKm}}</span> km from you</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--STORE SEARCH-->
+                <div class="mb-4 bg-light d-lg-flex justify-content-between align-items-center rounded col-12 col-md-9">
+                    <div class="p-6">
+                        <h5 class="mb-1 fw-bold">{{store.name}}</h5>
+                        <p class="mb-0">Whatever the occasion, we've got you covered.
+                        </p>
+                        <div class="position-relative mt-2">
+                            <form [formGroup]="storeSearch" (ngSubmit)="onStoreSearchSubmitted(storeSearch)">
+                                <input type="text" class="form-control" formControlName="keyWord" [placeholder]="'Search '+ store.name">
+                            </form>
+                            <span class="position-absolute end-0 top-0 mt-2 me-3" (click)="onStoreSearchSubmitted(storeSearch)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="feather feather-search">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </span>
+                            <!--for debugging-->
+                            <p>{{storeSearch.value |json}}</p>
+
+                        </div>
+                    </div>
+                    <div class="p-6 d-lg-block d-none">
+                        <img src="../assets/images/svg-graphics/store-graphics.svg" alt="" class="img-fluid">
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</section>
