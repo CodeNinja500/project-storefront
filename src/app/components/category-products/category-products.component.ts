@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map, shareReplay, switchMap } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { map, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import { SortOptionModel } from 'src/app/models/sort-option.model';
 import { ProductQueryModel } from 'src/app/query-models/product.query-model';
 import { CategoryModel } from '../../models/category.model';
 import { ProductModel } from '../../models/product.model';
@@ -21,6 +23,14 @@ export class CategoryProductsComponent {
     map((params) => params['categoryId']),
     shareReplay(1)
   );
+
+  readonly sortingOpts$: Observable<SortOptionModel[]> = of([
+    { display: 'Featured', key: 'featureValue', order: 'desc' },
+    { display: 'Price Low to High', key: 'price-low-high', order: 'asc' },
+    { display: 'Price High to Low', key: 'price-high-low', order: 'desc' },
+    { display: 'Avg. Rating', key: 'ratingValue', order: 'desc' }
+  ]);
+
   readonly categoryDetails$: Observable<CategoryModel> = this.categoryId$.pipe(
     switchMap((categoryId) => this._categoriesService.getSingleCategoryById(categoryId))
   );

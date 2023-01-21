@@ -30,6 +30,14 @@
                                 <div class="mb-4">
                                     <h6>{{products.length}} <small class="text-muted"> products found</small></h6>
                                 </div>
+                                <div>
+                                    <!-- select option -->
+                                    <select class="form-select">
+                                        <option *ngFor="let option of sortingOpts$|async" [value]="option.key">
+                                            {{option.display}}
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
                             <div class='row g-4 row-cols-1 mt2'>
                                 <div *ngFor="let product of products" class="col-12">
@@ -62,7 +70,8 @@
                                                     <!-- price -->
                                                     <div class="d-flex justify-content-between align-items-center mt-3">
                                                         <div>
-                                                            <span class="text-dark">{{product.price|currency}}</span>
+                                                            <span class="text-dark">{{product.price|currency}}</span><br>
+                                                            <span class="text-dark">{{product.featureValue}}</span>
                                                         </div>
                                                     </div>
                                                 </div>
