@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, combineLatest, from, of } from 'rxjs';
-import { filter, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import { filter, map, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 import { CategoryModel } from '../../models/category.model';
 import { QueryParamsQueryModel } from '../../query-models/query-params.query-model';
 import { SortOptionModel } from '../../models/sort-option.model';
@@ -17,7 +18,7 @@ import { ProductModel } from '../../models/product.model';
   encapsulation: ViewEncapsulation.Emulated,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CategoryProductsComponent {
+export class CategoryProductsComponent implements AfterViewInit {
   readonly categoryList$: Observable<CategoryModel[]> = this._categoriesService.getAllCategories();
   readonly categoryId$: Observable<string> = this._activatedRoute.params.pipe(
     map((params) => params['categoryId']),
@@ -28,14 +29,15 @@ export class CategoryProductsComponent {
       sort: params['sort'] ?? 'featureValue',
       order: params['order'] ?? 'desc'
     })),
-    shareReplay(1)
+    shareReplay(1),
+    tap((data) => this.setControlFromQueryParams(data))
   );
 
   readonly sortingOpts$: Observable<SortOptionModel[]> = of([
-    { display: 'Featured', key: 'featureValue', order: 'desc' },
-    { display: 'Price Low to High', key: 'price', order: 'asc' },
-    { display: 'Price High to Low', key: 'price', order: 'desc' },
-    { display: 'Avg. Rating', key: 'ratingValue', order: 'desc' }
+    { display: 'Featured', key: 'featureValue;desc', order: 'desc' },
+    { display: 'Price Low to High', key: 'price;asc', order: 'asc' },
+    { display: 'Price High to Low', key: 'price;desc', order: 'desc' },
+    { display: 'Avg. Rating', key: 'ratingValue;desc', order: 'desc' }
   ]);
 
   readonly categoryDetails$: Observable<CategoryModel> = this.categoryId$.pipe(
@@ -54,6 +56,7 @@ export class CategoryProductsComponent {
         )
     )
   );
+  readonly sortForm: FormControl = new FormControl();
 
   readonly productsFilteredAndSorted$: Observable<ProductQueryModel[]> = combineLatest([
     this.queryParams$,
@@ -118,12 +121,19 @@ export class CategoryProductsComponent {
     return starsArray;
   }
 
-  onSortChange(sortOption: SortOptionModel): void {
-    this._router.navigate([], {
-      queryParams: {
-        sort: sortOption.key,
-        order: sortOption.order
-      }
+  setControlFromQueryParams(params: QueryParamsQueryModel): void {
+    this.sortForm.setValue(params.sort + ';' + params.order);
+  }
+
+  ngAfterViewInit(): void {
+    this.sortForm.valueChanges.subscribe((value: string) => {
+      const sortArray = value.split(';');
+      this._router.navigate([], {
+        queryParams: {
+          sort: sortArray[0],
+          order: sortArray[1]
+        }
+      });
     });
   }
 }

@@ -32,9 +32,8 @@
                                 </div>
                                 <div>
                                     <!-- select option -->
-                                    <select class="form-select">
-                                        <option *ngFor="let option of sortingOpts$|async" [value]="option.key"
-                                            (click)='onSortChange(option)'>
+                                    <select class="form-select" [formControl]='sortForm'>
+                                        <option *ngFor="let option of sortingOpts$|async" [value]="option.key">
                                             {{option.display}}
                                         </option>
                                     </select>
