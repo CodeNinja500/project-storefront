@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
-import { filter, map, shareReplay, switchMap } from 'rxjs/operators';
+import { Observable, combineLatest } from 'rxjs';
+import { filter, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 import { TagModel } from '../../models/tag.model';
 import { StoreQueryModel } from '../../query-models/store.query-model';
 import { ProductModel } from '../../models/product.model';
@@ -19,9 +19,6 @@ import { StoreModel } from '../../models/store.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StoreProductsComponent {
-  private _keyWordForSearchSubject: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  public keyWordForSearch$: Observable<string> = this._keyWordForSearchSubject.asObservable();
-
   readonly storeId$: Observable<string> = this._activatedRoute.params.pipe(
     map((params) => params['storeId']),
     shareReplay(1)
@@ -33,27 +30,26 @@ export class StoreProductsComponent {
       this._storesService.getSingleStoreById(storeId).pipe(map((store) => this.mapToStoreQueryModel(tagsMap, store)))
     )
   );
+  readonly storeSearch: FormGroup = new FormGroup({ keyWord: new FormControl() });
 
   readonly productsInStoreList$: Observable<ProductModel[]> = combineLatest([
-    this.keyWordForSearch$,
+    this.storeSearch.valueChanges.pipe(startWith({ keyWord: '' })),
     this.storeId$
   ]).pipe(
-    switchMap(([keyWord, storeId]) =>
+    switchMap(([form, storeId]) =>
       this._productsService
         .getAllProducts()
         .pipe(
           map((products) =>
             products.filter((product) =>
               product.storeIds.some(
-                (productStoreId) => productStoreId === storeId && product.name.toLowerCase().includes(keyWord)
+                (productStoreId) => productStoreId === storeId && product.name.toLowerCase().includes(form.keyWord)
               )
             )
           )
         )
     )
   );
-
-  readonly storeSearch: FormGroup = new FormGroup({ keyWord: new FormControl() });
 
   constructor(
     private _activatedRoute: ActivatedRoute,
@@ -70,14 +66,5 @@ export class StoreProductsComponent {
       distanceInKm: Math.round(store.distanceInMeters / 100) / 10,
       tags: store.tagIds.map((tagId) => tagsMap[tagId]?.name)
     };
-  }
-
-  onStoreSearchSubmitted(storeSearch: FormGroup): void {
-    this._keyWordForSearchSubject.next(storeSearch.value.keyWord.toLowerCase());
-  }
-
-  onDeleteSearchButtonClick(): void {
-    this._keyWordForSearchSubject.next('');
-    this.storeSearch.setValue({ keyWord: '' });
   }
 }
