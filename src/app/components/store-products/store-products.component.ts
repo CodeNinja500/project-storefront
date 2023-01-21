@@ -43,7 +43,8 @@ export class StoreProductsComponent {
           map((products) =>
             products.filter((product) =>
               product.storeIds.some(
-                (productStoreId) => productStoreId === storeId && product.name.toLowerCase().includes(form.keyWord)
+                (productStoreId) =>
+                  productStoreId === storeId && product.name.toLowerCase().includes(form.keyWord.toLowerCase())
               )
             )
           )
