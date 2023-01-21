@@ -64,20 +64,13 @@ export class CategoryProductsComponent implements AfterViewInit {
   ]).pipe(
     map(([params, products]) =>
       products.sort((a, b) => {
-        if (params.sort === 'featureValue') {
-          if (a.featureValue > b.featureValue) return params.order === 'asc' ? 1 : -1;
-          if (a.featureValue < b.featureValue) return params.order === 'asc' ? -1 : 1;
-          else return 0;
+        const prev = Object.assign(a);
+        const next = Object.assign(b);
+        if (prev[params['sort']] > next[params['sort']]) {
+          return params['order'] === 'asc' ? 1 : -1;
         }
-        if (params.sort === 'price') {
-          if (a.price > b.price) return params.order === 'asc' ? 1 : -1;
-          if (a.price < b.price) return params.order === 'asc' ? -1 : 1;
-          else return 0;
-        }
-        if (params.sort === 'ratingValue') {
-          if (a.ratingValue > b.ratingValue) return params.order === 'asc' ? 1 : -1;
-          if (a.ratingValue < b.ratingValue) return params.order === 'asc' ? -1 : 1;
-          else return 0;
+        if (prev[params['sort']] < next[params['sort']]) {
+          return params['order'] === 'asc' ? -1 : 1;
         } else return 0;
       })
     )
