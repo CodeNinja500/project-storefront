@@ -1,0 +1,31 @@
+<section class="my-lg-14 my-8" *ngIf="categoryDetails$ | async as category">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-lg-3 col-md-4 mb-4 mb-md-0">
+                <div class="col-12">
+                    <div class="mb-4">
+                        <h5>Categories</h5>
+                    </div>
+                </div>
+                <ul class="nav nav-category">
+                    <li *ngFor="let item of categoryList$ | async" class="nav-item border-bottom w-100"><a class="nav-link"
+                            [routerLink]="'/categories/'+item.id" role="button">{{item.name}}<i
+                                class="feather-icon icon-chevron-right"></i></a></li>
+                </ul>
+            </div>
+            <div class="col-12 col-lg-9 col-md-8">
+                <ng-container>
+                    <!-- card -->
+                    <div class="card mb-4 bg-light border-0">
+                        <!-- card body -->
+                        <div class="card-body p-9">
+                            <h2 class="mb-0 fs-4">{{category.name}}</h2>
+                        </div>
+                    </div>
+                </ng-container>
+                <section class="my-lg-2 my-1">
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
