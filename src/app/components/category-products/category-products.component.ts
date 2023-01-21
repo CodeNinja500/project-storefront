@@ -34,10 +34,10 @@ export class CategoryProductsComponent implements AfterViewInit {
   );
 
   readonly sortingOpts$: Observable<SortOptionModel[]> = of([
-    { display: 'Featured', key: 'featureValue;desc', order: 'desc' },
-    { display: 'Price Low to High', key: 'price;asc', order: 'asc' },
-    { display: 'Price High to Low', key: 'price;desc', order: 'desc' },
-    { display: 'Avg. Rating', key: 'ratingValue;desc', order: 'desc' }
+    { display: 'Featured', key: 'featureValue;desc' },
+    { display: 'Price Low to High', key: 'price;asc' },
+    { display: 'Price High to Low', key: 'price;desc' },
+    { display: 'Avg. Rating', key: 'ratingValue;desc' }
   ]);
 
   readonly categoryDetails$: Observable<CategoryModel> = this.categoryId$.pipe(
