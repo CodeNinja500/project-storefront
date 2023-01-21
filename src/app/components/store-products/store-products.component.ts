@@ -73,8 +73,6 @@ export class StoreProductsComponent {
   }
 
   onStoreSearchSubmitted(storeSearch: FormGroup): void {
-    //for debugging
-    console.log('Searching for products with keyWord: ' + storeSearch.value.keyWord);
     this._keyWordForSearchSubject.next(storeSearch.value.keyWord.toLowerCase());
   }
 

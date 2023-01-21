@@ -38,7 +38,6 @@
                                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                 </svg>
                             </span>
-                            <!--for debugging-->
                             <ng-container *ngIf="keyWordForSearch$|async as keyWord">
                                 <ng-container *ngIf="keyWord.length>0">
                                     <div class="hstack gap-2 mt-3">
@@ -48,11 +47,8 @@
                                         <button type="button" class="btn-close" aria-label="Close"
                                             (click)="onDeleteSearchButtonClick()"></button>
                                     </div>
-
                                 </ng-container>
                             </ng-container>
-
-
                         </div>
                     </div>
                     <div class="p-6 d-lg-block d-none">
