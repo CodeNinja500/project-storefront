@@ -24,7 +24,7 @@
                     </div>
                 </ng-container>
                 <section class="my-lg-2 my-1">
-                    <div class="container" *ngIf="productInCategoryList$ | async as products">
+                    <div class="container" *ngIf="productsFilteredAndSorted$ | async as products">
                         <div class="row">
                             <div class="col-12 d-flex justify-content-between align-items-center flex-wrap">
                                 <div class="mb-4">
@@ -33,7 +33,8 @@
                                 <div>
                                     <!-- select option -->
                                     <select class="form-select">
-                                        <option *ngFor="let option of sortingOpts$|async" [value]="option.key">
+                                        <option *ngFor="let option of sortingOpts$|async" [value]="option.key"
+                                            (click)='onSortChange(option)'>
                                             {{option.display}}
                                         </option>
                                     </select>
@@ -71,7 +72,6 @@
                                                     <div class="d-flex justify-content-between align-items-center mt-3">
                                                         <div>
                                                             <span class="text-dark">{{product.price|currency}}</span><br>
-                                                            <span class="text-dark">{{product.featureValue}}</span>
                                                         </div>
                                                     </div>
                                                 </div>
