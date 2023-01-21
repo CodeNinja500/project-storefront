@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, combineLatest } from 'rxjs';
-import { filter, map, shareReplay, switchMap } from 'rxjs/operators';
+import { filter, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 import { TagModel } from '../../models/tag.model';
 import { StoreQueryModel } from '../../query-models/store.query-model';
 import { ProductModel } from '../../models/product.model';
@@ -30,8 +30,27 @@ export class StoreProductsComponent {
       this._storesService.getSingleStoreById(storeId).pipe(map((store) => this.mapToStoreQueryModel(tagsMap, store)))
     )
   );
-
   readonly storeSearch: FormGroup = new FormGroup({ keyWord: new FormControl() });
+
+  readonly productsInStoreList$: Observable<ProductModel[]> = combineLatest([
+    this.storeSearch.valueChanges.pipe(startWith({ keyWord: '' })),
+    this.storeId$
+  ]).pipe(
+    switchMap(([form, storeId]) =>
+      this._productsService
+        .getAllProducts()
+        .pipe(
+          map((products) =>
+            products.filter((product) =>
+              product.storeIds.some(
+                (productStoreId) =>
+                  productStoreId === storeId && product.name.toLowerCase().includes(form.keyWord.toLowerCase())
+              )
+            )
+          )
+        )
+    )
+  );
 
   constructor(
     private _activatedRoute: ActivatedRoute,
@@ -49,6 +68,4 @@ export class StoreProductsComponent {
       tags: store.tagIds.map((tagId) => tagsMap[tagId]?.name)
     };
   }
-
-  onStoreSearchSubmitted(storeSearch: FormGroup): void {}
 }
