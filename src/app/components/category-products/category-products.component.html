@@ -49,9 +49,21 @@
                                                     <h3 class='fs-6 text-muted'>{{category.name}}</h3>
                                                     <!-- title -->
                                                     <h2 class="fs-6">{{product.name}}</h2>
+                                                    <!--rating -->
+                                                    <small class="text-warning">
+                                                        <i *ngFor="let val of product.ratingStars" class="bi"
+                                                            [ngClass]="{'bi-star-fill': val === 1, 'bi-star': val === 0, 'bi-star-half': val === 0.5}">
+                                                        </i>
+                                                        {{product.ratingValue}}
+                                                    </small>
+                                                    <span class='text-muted small'>
+                                                        ({{product.ratingCount}})
+                                                    </span>
                                                     <!-- price -->
                                                     <div class="d-flex justify-content-between align-items-center mt-3">
-                                                        <div> <span class="text-dark">{{product.price|currency}}</span> </div>
+                                                        <div>
+                                                            <span class="text-dark">{{product.price|currency}}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
