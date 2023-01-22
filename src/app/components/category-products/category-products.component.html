@@ -25,7 +25,7 @@
                         </div>
                     </ng-container>
                     <section class="my-lg-2 my-1">
-                        <div class="container" *ngIf="productsFilteredAndSorted$ | async as products">
+                        <div class="container" *ngIf="productsPaginated$ | async as products">
                             <div class="row">
                                 <div class="col-12 d-flex justify-content-between align-items-center flex-wrap">
                                     <div class="mb-4">
@@ -88,8 +88,8 @@
                             <span>Page</span>
                             <nav>
                                 <ul class="pagination">
-                                    <li class="page-item" *ngFor="let page of pages$ | async" [ngClass]="{active:page==queryParams.page}"><a
-                                            class="page-link">{{page}}</a></li>
+                                    <li class="page-item" *ngFor="let page of pages$ | async" [ngClass]="{active:page==queryParams.page}"
+                                        (click)='onPageChanged(page,queryParams)'><a class="page-link">{{page}}</a></li>
                                 </ul>
                             </nav>
                         </div>
@@ -98,7 +98,8 @@
                             <nav>
                                 <ul class="pagination">
                                     <li class="page-item" *ngFor="let limit of limitOpts | async"
-                                        [ngClass]="{active: limit==queryParams.limit}"><a class="page-link">{{limit}}</a></li>
+                                        [ngClass]="{active: limit==queryParams.limit}" (click)='onLimitChanged(limit,queryParams)'><a
+                                            class="page-link">{{limit}}</a></li>
                                 </ul>
                             </nav>
                         </div>
