@@ -213,21 +213,37 @@ export class CategoryProductsComponent implements AfterViewInit {
     this.queryParams$
       .pipe(
         switchMap((params: QueryParamsQueryModel) =>
-          this.sortForm.valueChanges.pipe(
-            tap((formValue) => {
-              const sortArray = formValue.split(';');
-              this._router.navigate([], {
-                queryParams: {
-                  sort: sortArray[0],
-                  order: sortArray[1],
-                  limit: params['limit'],
-                  page: params['page'],
-                  priceFrom: params['priceFrom'] ?? null,
-                  priceTo: params['priceTo'] ?? null
-                }
-              });
-            })
-          )
+          combineLatest([
+            this.sortForm.valueChanges.pipe(
+              tap((formValue) => {
+                const sortArray = formValue.split(';');
+                this._router.navigate([], {
+                  queryParams: {
+                    sort: sortArray[0],
+                    order: sortArray[1],
+                    limit: params['limit'],
+                    page: params['page'],
+                    priceFrom: params['priceFrom'] ?? null,
+                    priceTo: params['priceTo'] ?? null
+                  }
+                });
+              })
+            ),
+            this.priceRangeForm.valueChanges.pipe(
+              tap((formValue) => {
+                this._router.navigate([], {
+                  queryParams: {
+                    sort: params['sort'],
+                    order: params['order'],
+                    limit: params['limit'],
+                    page: params['page'],
+                    priceFrom: formValue.priceFrom ? formValue.priceFrom : null,
+                    priceTo: formValue.priceTo ? formValue.priceTo : null
+                  }
+                });
+              })
+            )
+          ])
         )
       )
       .subscribe();
