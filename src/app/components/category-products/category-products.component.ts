@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject, combineLatest, from, of } from 'rxjs';
 import { filter, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
@@ -91,6 +91,8 @@ export class CategoryProductsComponent implements AfterViewInit {
 
   private _pagesSubject: Subject<number[]> = new Subject<number[]>();
   public pages$: Observable<number[]> = this._pagesSubject.asObservable();
+
+  readonly priceRangeForm: FormGroup = new FormGroup({ priceFrom: new FormControl(), priceTo: new FormControl() });
 
   constructor(
     private _categoriesService: CategoriesService,
