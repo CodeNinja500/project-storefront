@@ -78,7 +78,8 @@ export class CategoryProductsComponent implements AfterViewInit {
       })
     ),
     shareReplay(1),
-    tap((data) => this.calcNumberOfPages(data))
+    tap((data) => this.calcNumberOfPages(data)),
+    tap((data) => this.checkPaginationAfterFilterAdded(data))
   );
 
   readonly productsPaginated$: Observable<ProductQueryModel[]> = combineLatest([
@@ -145,6 +146,7 @@ export class CategoryProductsComponent implements AfterViewInit {
       )
       .subscribe();
   }
+
   onPageChanged(page: number, queryParams: QueryParamsQueryModel): void {
     this._router.navigate([], {
       queryParams: {
@@ -155,6 +157,7 @@ export class CategoryProductsComponent implements AfterViewInit {
       }
     });
   }
+
   onLimitChanged(limit: number, queryParams: QueryParamsQueryModel): void {
     this.productsFilteredAndSorted$
       .pipe(
@@ -168,6 +171,26 @@ export class CategoryProductsComponent implements AfterViewInit {
               page: queryParams.page > products.length / limit ? Math.ceil(products.length / limit) : queryParams.page
             }
           });
+        })
+      )
+      .subscribe();
+  }
+
+  checkPaginationAfterFilterAdded(products: ProductQueryModel[]): void {
+    this.queryParams$
+      .pipe(
+        take(1),
+        tap((params) => {
+          if (params.page > Math.ceil(products.length / params.limit)) {
+            this._router.navigate([], {
+              queryParams: {
+                sort: params.sort,
+                order: params.order,
+                limit: params.limit,
+                page: Math.ceil(products.length / params.limit)
+              }
+            });
+          }
         })
       )
       .subscribe();
