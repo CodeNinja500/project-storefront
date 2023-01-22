@@ -30,7 +30,8 @@ export class CategoryProductsComponent implements AfterViewInit {
       sort: params['sort'] ?? 'featureValue',
       order: params['order'] ?? 'desc',
       limit: params['limit'] ? Math.max(+params['limit'], 5) : 5,
-      page: params['page'] ? Math.max(+params['page'], 1) : 1
+      page: params['page'] ? Math.max(+params['page'], 1) : 1,
+      minRating: params['minRating'] ?? null
     })),
     shareReplay(1),
     tap((data) => this.setControlFromQueryParams(data))
@@ -75,16 +76,18 @@ export class CategoryProductsComponent implements AfterViewInit {
     this.productInCategoryList$
   ]).pipe(
     map(([params, products]) =>
-      products.sort((a, b) => {
-        const prev = Object.assign(a);
-        const next = Object.assign(b);
-        if (prev[params['sort']] > next[params['sort']]) {
-          return params['order'] === 'asc' ? 1 : -1;
-        }
-        if (prev[params['sort']] < next[params['sort']]) {
-          return params['order'] === 'asc' ? -1 : 1;
-        } else return 0;
-      })
+      products
+        .sort((a, b) => {
+          const prev = Object.assign(a);
+          const next = Object.assign(b);
+          if (prev[params['sort']] > next[params['sort']]) {
+            return params['order'] === 'asc' ? 1 : -1;
+          }
+          if (prev[params['sort']] < next[params['sort']]) {
+            return params['order'] === 'asc' ? -1 : 1;
+          } else return 0;
+        })
+        .filter((product) => (params['minRating'] ? product.ratingValue >= +params['minRating'] : true))
     ),
     shareReplay(1),
     tap((data) => this.calcNumberOfPages(data)),
@@ -162,7 +165,8 @@ export class CategoryProductsComponent implements AfterViewInit {
         sort: queryParams.sort,
         order: queryParams.order,
         limit: queryParams.limit,
-        page: page
+        page: page,
+        minRating: queryParams.minRating ?? null
       }
     });
   }
@@ -177,7 +181,8 @@ export class CategoryProductsComponent implements AfterViewInit {
               sort: queryParams.sort,
               order: queryParams.order,
               limit: limit,
-              page: queryParams.page > products.length / limit ? Math.ceil(products.length / limit) : queryParams.page
+              page: queryParams.page > products.length / limit ? Math.ceil(products.length / limit) : queryParams.page,
+              minRating: queryParams.minRating ?? null
             }
           });
         })
@@ -196,13 +201,26 @@ export class CategoryProductsComponent implements AfterViewInit {
                 sort: params.sort,
                 order: params.order,
                 limit: params.limit,
-                page: Math.ceil(products.length / params.limit)
+                page: Math.ceil(products.length / params.limit),
+                minRating: params.minRating ?? null
               }
             });
           }
         })
       )
       .subscribe();
+  }
+
+  onMinRatingChanged(rating: number, params: QueryParamsQueryModel): void {
+    this._router.navigate([], {
+      queryParams: {
+        sort: params.sort,
+        order: params.order,
+        limit: params.limit,
+        page: params.page,
+        minRating: rating == params.minRating ? null : rating
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -217,7 +235,8 @@ export class CategoryProductsComponent implements AfterViewInit {
                   sort: sortArray[0],
                   order: sortArray[1],
                   limit: params['limit'],
-                  page: params['page']
+                  page: params['page'],
+                  minRating: params['minRating'] ?? null
                 }
               });
             })
