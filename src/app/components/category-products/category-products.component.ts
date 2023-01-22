@@ -141,21 +141,6 @@ export class CategoryProductsComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // combineLatest([this.sortForm.valueChanges, this.queryParams$.pipe(take(1))])
-    //   .pipe(
-    //     tap(([value, queryParams]) => {
-    //       const sortArray = value.split(';');
-    //       this._router.navigate([], {
-    //         queryParams: {
-    //           sort: sortArray[0],
-    //           order: sortArray[1],
-    //           limit: queryParams['limit'],
-    //           page: queryParams['page']
-    //         }
-    //       });
-    //     })
-    //   )
-    //   .subscribe();
     this.queryParams$
       .pipe(
         switchMap((params: QueryParamsQueryModel) =>
@@ -175,25 +160,5 @@ export class CategoryProductsComponent implements AfterViewInit {
         )
       )
       .subscribe();
-
-    // this.sortForm.valueChanges
-    //   .pipe(
-    //     switchMap((formValue) =>
-    //       this.queryParams$.pipe(
-    //         tap((params) => {
-    //           const sortArray = formValue.split(';');
-    //           this._router.navigate([], {
-    //             queryParams: {
-    //               sort: sortArray[0],
-    //               order: sortArray[1],
-    //               limit: params['limit'],
-    //               page: params['page']
-    //             }
-    //           });
-    //         })
-    //       )
-    //     )
-    //   )
-    //   .subscribe();
   }
 }
