@@ -10,6 +10,7 @@ import { ProductQueryModel } from '../../query-models/product.query-model';
 import { CategoriesService } from '../../services/categories.service';
 import { ProductsService } from '../../services/products.service';
 import { ProductModel } from '../../models/product.model';
+import { RatingQueryModel } from 'src/app/query-models/rating.query-model';
 
 @Component({
   selector: 'app-category-products',
@@ -34,6 +35,14 @@ export class CategoryProductsComponent implements AfterViewInit {
     shareReplay(1),
     tap((data) => this.setControlFromQueryParams(data))
   );
+
+  readonly ratingOptions$: Observable<RatingQueryModel[]> = of([
+    { value: 5, stars: this.mapRatingNumberToStars(5) },
+    { value: 4, stars: this.mapRatingNumberToStars(4) },
+    { value: 3, stars: this.mapRatingNumberToStars(3) },
+    { value: 2, stars: this.mapRatingNumberToStars(2) },
+    { value: 1, stars: this.mapRatingNumberToStars(1) }
+  ]);
 
   readonly sortingOpts$: Observable<SortOptionModel[]> = of([
     { display: 'Featured', key: 'featureValue;desc' },
