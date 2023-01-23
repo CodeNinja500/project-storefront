@@ -33,7 +33,8 @@ export class CategoryProductsComponent implements AfterViewInit {
       page: params['page'] ? Math.max(+params['page'], 1) : 1,
       priceFrom: params['priceFrom'] ?? null,
       priceTo: params['priceTo'] ?? null,
-      minRating: params['minRating'] ?? null
+      minRating: params['minRating'] ?? null,
+      stores: params['stores'] ? new Set<string>(params['stores'].split(',')) : new Set<string>([])
     })),
     shareReplay(1),
     tap((data) => this.setControlFromQueryParams(data))
@@ -93,6 +94,7 @@ export class CategoryProductsComponent implements AfterViewInit {
         .filter((product) => (params.priceFrom ? product.price >= params.priceFrom : true))
         .filter((product) => (params.priceTo ? product.price <= params.priceTo : true))
         .filter((product) => (params['minRating'] ? product.ratingValue >= +params['minRating'] : true))
+        .filter((product) => (params.stores ? product.storeIds.find((storeId) => params.stores?.has(storeId)) : true))
     ),
     shareReplay(1),
     tap((data) => this.calcNumberOfPages(data)),
@@ -167,12 +169,17 @@ export class CategoryProductsComponent implements AfterViewInit {
   }
 
   onPageChanged(page: number, queryParams: QueryParamsQueryModel): void {
+    const stores: Set<string> = queryParams.stores;
     this._router.navigate([], {
-      queryParams: Object.assign({}, queryParams, { page: page })
+      queryParams: Object.assign({}, queryParams, {
+        page: page,
+        stores: Array.from(stores).join().length > 0 ? Array.from(stores).join() : null
+      })
     });
   }
 
   onLimitChanged(limit: number, queryParams: QueryParamsQueryModel): void {
+    const stores: Set<string> = queryParams.stores;
     this.productsFilteredAndSorted$
       .pipe(
         take(1),
@@ -180,7 +187,8 @@ export class CategoryProductsComponent implements AfterViewInit {
           this._router.navigate([], {
             queryParams: Object.assign({}, queryParams, {
               limit: limit,
-              page: queryParams.page > products.length / limit ? Math.ceil(products.length / limit) : queryParams.page
+              page: queryParams.page > products.length / limit ? Math.ceil(products.length / limit) : queryParams.page,
+              stores: Array.from(stores).join().length > 0 ? Array.from(stores).join() : null
             })
           });
         })
@@ -193,9 +201,13 @@ export class CategoryProductsComponent implements AfterViewInit {
       .pipe(
         take(1),
         tap((params) => {
+          const stores: Set<string> = params.stores;
           if (params.page > Math.ceil(products.length / params.limit)) {
             this._router.navigate([], {
-              queryParams: Object.assign({}, params, { page: Math.ceil(products.length / params.limit) })
+              queryParams: Object.assign({}, params, {
+                page: Math.ceil(products.length / params.limit),
+                stores: Array.from(stores).join().length > 0 ? Array.from(stores).join() : null
+              })
             });
           }
         })
@@ -204,8 +216,12 @@ export class CategoryProductsComponent implements AfterViewInit {
   }
 
   onMinRatingChanged(rating: number, params: QueryParamsQueryModel): void {
+    const stores: Set<string> = params.stores;
     this._router.navigate([], {
-      queryParams: Object.assign({}, params, { minRating: rating == params.minRating ? null : rating })
+      queryParams: Object.assign({}, params, {
+        minRating: rating == params.minRating ? null : rating,
+        stores: Array.from(stores).join().length > 0 ? Array.from(stores).join() : null
+      })
     });
   }
 
@@ -216,18 +232,25 @@ export class CategoryProductsComponent implements AfterViewInit {
           combineLatest([
             this.sortForm.valueChanges.pipe(
               tap((formValue) => {
+                const stores: Set<string> = params.stores;
                 const sortArray = formValue.split(';');
                 this._router.navigate([], {
-                  queryParams: Object.assign({}, params, { sort: sortArray[0], order: sortArray[1] })
+                  queryParams: Object.assign({}, params, {
+                    sort: sortArray[0],
+                    order: sortArray[1],
+                    stores: Array.from(stores).join().length > 0 ? Array.from(stores).join() : null
+                  })
                 });
               })
             ),
             this.filterForm.valueChanges.pipe(
               tap((formValue) => {
+                const stores: Set<string> = params.stores;
                 this._router.navigate([], {
                   queryParams: Object.assign({}, params, {
                     priceFrom: formValue.priceFrom ? formValue.priceFrom : null,
-                    priceTo: formValue.priceTo ? formValue.priceTo : null
+                    priceTo: formValue.priceTo ? formValue.priceTo : null,
+                    stores: Array.from(stores).join().length > 0 ? Array.from(stores).join() : null
                   })
                 });
               })
