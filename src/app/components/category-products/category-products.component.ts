@@ -149,12 +149,7 @@ export class CategoryProductsComponent implements AfterViewInit {
 
   onPageChanged(page: number, queryParams: QueryParamsQueryModel): void {
     this._router.navigate([], {
-      queryParams: {
-        sort: queryParams.sort,
-        order: queryParams.order,
-        limit: queryParams.limit,
-        page: page
-      }
+      queryParams: Object.assign({}, queryParams, { page: page })
     });
   }
 
@@ -164,12 +159,10 @@ export class CategoryProductsComponent implements AfterViewInit {
         take(1),
         tap((products) => {
           this._router.navigate([], {
-            queryParams: {
-              sort: queryParams.sort,
-              order: queryParams.order,
+            queryParams: Object.assign({}, queryParams, {
               limit: limit,
               page: queryParams.page > products.length / limit ? Math.ceil(products.length / limit) : queryParams.page
-            }
+            })
           });
         })
       )
@@ -183,12 +176,7 @@ export class CategoryProductsComponent implements AfterViewInit {
         tap((params) => {
           if (params.page > Math.ceil(products.length / params.limit)) {
             this._router.navigate([], {
-              queryParams: {
-                sort: params.sort,
-                order: params.order,
-                limit: params.limit,
-                page: Math.ceil(products.length / params.limit)
-              }
+              queryParams: Object.assign({}, params, { page: Math.ceil(products.length / params.limit) })
             });
           }
         })
@@ -204,12 +192,7 @@ export class CategoryProductsComponent implements AfterViewInit {
             tap((formValue) => {
               const sortArray = formValue.split(';');
               this._router.navigate([], {
-                queryParams: {
-                  sort: sortArray[0],
-                  order: sortArray[1],
-                  limit: params['limit'],
-                  page: params['page']
-                }
+                queryParams: Object.assign({}, params, { sort: sortArray[0], order: sortArray[1] })
               });
             })
           )
