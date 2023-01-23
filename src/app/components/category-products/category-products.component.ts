@@ -254,6 +254,18 @@ export class CategoryProductsComponent implements AfterViewInit {
       .subscribe();
   }
 
+  onCategoryChanged(categoryId: string, params: QueryParamsQueryModel): void {
+    const stores: Set<string> = params.stores;
+    this._router.navigate(['/categories/' + categoryId], {
+      queryParams: Object.assign({}, params, {
+        priceFrom: null,
+        priceTo: null,
+        minRating: null,
+        stores: this.convertToStoreParams(stores)
+      })
+    });
+  }
+
   convertToStoreParams(stores: Set<string>): string | null {
     return Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null;
   }
