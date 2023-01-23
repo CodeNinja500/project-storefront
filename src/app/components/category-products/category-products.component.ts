@@ -181,7 +181,7 @@ export class CategoryProductsComponent implements AfterViewInit {
     this._router.navigate([], {
       queryParams: Object.assign({}, queryParams, {
         page: page,
-        stores: Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null
+        stores: this.convertToStoreParams(stores)
       })
     });
   }
@@ -196,7 +196,7 @@ export class CategoryProductsComponent implements AfterViewInit {
             queryParams: Object.assign({}, queryParams, {
               limit: limit,
               page: queryParams.page > products.length / limit ? Math.ceil(products.length / limit) : queryParams.page,
-              stores: Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null
+              stores: this.convertToStoreParams(stores)
             })
           });
         })
@@ -214,7 +214,7 @@ export class CategoryProductsComponent implements AfterViewInit {
             this._router.navigate([], {
               queryParams: Object.assign({}, params, {
                 page: Math.ceil(products.length / params.limit),
-                stores: Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null
+                stores: this.convertToStoreParams(stores)
               })
             });
           }
@@ -228,7 +228,7 @@ export class CategoryProductsComponent implements AfterViewInit {
     this._router.navigate([], {
       queryParams: Object.assign({}, params, {
         minRating: rating == params.minRating ? null : rating,
-        stores: Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null
+        stores: this.convertToStoreParams(stores)
       })
     });
   }
@@ -246,12 +246,16 @@ export class CategoryProductsComponent implements AfterViewInit {
           }
           this._router.navigate([], {
             queryParams: Object.assign({}, params, {
-              stores: Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null
+              stores: this.convertToStoreParams(stores)
             })
           });
         })
       )
       .subscribe();
+  }
+
+  convertToStoreParams(stores: Set<string>): string | null {
+    return Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null;
   }
 
   ngAfterViewInit(): void {
@@ -267,7 +271,7 @@ export class CategoryProductsComponent implements AfterViewInit {
                   queryParams: Object.assign({}, params, {
                     sort: sortArray[0],
                     order: sortArray[1],
-                    stores: Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null
+                    stores: this.convertToStoreParams(stores)
                   })
                 });
               })
@@ -279,7 +283,7 @@ export class CategoryProductsComponent implements AfterViewInit {
                   queryParams: Object.assign({}, params, {
                     priceFrom: formValue.priceFrom ? formValue.priceFrom : null,
                     priceTo: formValue.priceTo ? formValue.priceTo : null,
-                    stores: Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null
+                    stores: this.convertToStoreParams(stores)
                   })
                 });
               })
