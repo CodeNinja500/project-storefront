@@ -181,7 +181,7 @@ export class CategoryProductsComponent implements AfterViewInit {
     this._router.navigate([], {
       queryParams: Object.assign({}, queryParams, {
         page: page,
-        stores: Array.from(stores).join().length > 0 ? Array.from(stores).join() : null
+        stores: Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null
       })
     });
   }
@@ -196,7 +196,7 @@ export class CategoryProductsComponent implements AfterViewInit {
             queryParams: Object.assign({}, queryParams, {
               limit: limit,
               page: queryParams.page > products.length / limit ? Math.ceil(products.length / limit) : queryParams.page,
-              stores: Array.from(stores).join().length > 0 ? Array.from(stores).join() : null
+              stores: Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null
             })
           });
         })
@@ -214,7 +214,7 @@ export class CategoryProductsComponent implements AfterViewInit {
             this._router.navigate([], {
               queryParams: Object.assign({}, params, {
                 page: Math.ceil(products.length / params.limit),
-                stores: Array.from(stores).join().length > 0 ? Array.from(stores).join() : null
+                stores: Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null
               })
             });
           }
@@ -228,9 +228,30 @@ export class CategoryProductsComponent implements AfterViewInit {
     this._router.navigate([], {
       queryParams: Object.assign({}, params, {
         minRating: rating == params.minRating ? null : rating,
-        stores: Array.from(stores).join().length > 0 ? Array.from(stores).join() : null
+        stores: Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null
       })
     });
+  }
+
+  onStoreFilterChanged(storeId: string): void {
+    this.queryParams$
+      .pipe(
+        take(1),
+        tap((params) => {
+          const stores: Set<string> = params.stores;
+          if (!stores.has(storeId)) {
+            stores.add(storeId);
+          } else {
+            stores.delete(storeId);
+          }
+          this._router.navigate([], {
+            queryParams: Object.assign({}, params, {
+              stores: Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null
+            })
+          });
+        })
+      )
+      .subscribe();
   }
 
   ngAfterViewInit(): void {
@@ -246,7 +267,7 @@ export class CategoryProductsComponent implements AfterViewInit {
                   queryParams: Object.assign({}, params, {
                     sort: sortArray[0],
                     order: sortArray[1],
-                    stores: Array.from(stores).join().length > 0 ? Array.from(stores).join() : null
+                    stores: Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null
                   })
                 });
               })
@@ -258,7 +279,7 @@ export class CategoryProductsComponent implements AfterViewInit {
                   queryParams: Object.assign({}, params, {
                     priceFrom: formValue.priceFrom ? formValue.priceFrom : null,
                     priceTo: formValue.priceTo ? formValue.priceTo : null,
-                    stores: Array.from(stores).join().length > 0 ? Array.from(stores).join() : null
+                    stores: Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null
                   })
                 });
               })
