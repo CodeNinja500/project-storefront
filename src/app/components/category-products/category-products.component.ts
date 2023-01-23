@@ -96,7 +96,11 @@ export class CategoryProductsComponent implements AfterViewInit {
         .filter((product) => (params.priceFrom ? product.price >= params.priceFrom : true))
         .filter((product) => (params.priceTo ? product.price <= params.priceTo : true))
         .filter((product) => (params['minRating'] ? product.ratingValue >= +params['minRating'] : true))
-        .filter((product) => (params.stores ? product.storeIds.find((storeId) => params.stores?.has(storeId)) : true))
+        .filter((product) =>
+          params.stores
+            ? product.storeIds.find((storeId) => params.stores?.has(storeId)) || params.stores.size == 0
+            : true
+        )
     ),
     shareReplay(1),
     tap((data) => this.calcNumberOfPages(data)),
