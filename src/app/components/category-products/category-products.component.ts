@@ -173,7 +173,7 @@ export class CategoryProductsComponent implements AfterViewInit {
         take(1),
         tap((params: QueryParamsQueryModel) => {
           this._pagesSubject.next(
-            Array.from(Array(Math.ceil(products.length / params.limit)).keys()).map((key) => key + 1)
+            Array.from(Array(Math.max(1, Math.ceil(products.length / params.limit))).keys()).map((key) => key + 1)
           );
         })
       )
