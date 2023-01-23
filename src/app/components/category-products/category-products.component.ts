@@ -207,14 +207,10 @@ export class CategoryProductsComponent implements AfterViewInit {
             this.priceRangeForm.valueChanges.pipe(
               tap((formValue) => {
                 this._router.navigate([], {
-                  queryParams: {
-                    sort: params['sort'],
-                    order: params['order'],
-                    limit: params['limit'],
-                    page: params['page'],
+                  queryParams: Object.assign({}, params, {
                     priceFrom: formValue.priceFrom ? formValue.priceFrom : null,
                     priceTo: formValue.priceTo ? formValue.priceTo : null
-                  }
+                  })
                 });
               })
             )
