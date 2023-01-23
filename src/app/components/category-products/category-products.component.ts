@@ -161,6 +161,10 @@ export class CategoryProductsComponent implements AfterViewInit {
 
   setControlFromQueryParams(params: QueryParamsQueryModel): void {
     this.sortForm.setValue(params.sort + ';' + params.order);
+    this.filterForm.setValue({
+      priceFrom: params.priceFrom,
+      priceTo: params.priceTo
+    });
   }
 
   calcNumberOfPages(products: ProductQueryModel[]): void {
