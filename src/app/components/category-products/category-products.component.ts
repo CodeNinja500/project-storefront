@@ -205,13 +205,7 @@ export class CategoryProductsComponent implements AfterViewInit {
 
   onMinRatingChanged(rating: number, params: QueryParamsQueryModel): void {
     this._router.navigate([], {
-      queryParams: {
-        sort: params.sort,
-        order: params.order,
-        limit: params.limit,
-        page: params.page,
-        minRating: rating == params.minRating ? null : rating
-      }
+      queryParams: Object.assign({}, params, { minRating: rating == params.minRating ? null : rating })
     });
   }
 
