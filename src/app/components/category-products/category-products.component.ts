@@ -186,7 +186,8 @@ export class CategoryProductsComponent implements AfterViewInit {
       queryParams: Object.assign({}, queryParams, {
         page: page,
         stores: this.convertToStoreParams(stores)
-      })
+      }),
+      replaceUrl: true
     });
   }
 
@@ -201,7 +202,8 @@ export class CategoryProductsComponent implements AfterViewInit {
               limit: limit,
               page: queryParams.page > products.length / limit ? Math.ceil(products.length / limit) : queryParams.page,
               stores: this.convertToStoreParams(stores)
-            })
+            }),
+            replaceUrl: true
           });
         })
       )
@@ -219,7 +221,8 @@ export class CategoryProductsComponent implements AfterViewInit {
               queryParams: Object.assign({}, params, {
                 page: Math.ceil(products.length / params.limit),
                 stores: this.convertToStoreParams(stores)
-              })
+              }),
+              replaceUrl: true
             });
           }
         })
@@ -233,7 +236,8 @@ export class CategoryProductsComponent implements AfterViewInit {
       queryParams: Object.assign({}, params, {
         minRating: rating == params.minRating ? null : rating,
         stores: this.convertToStoreParams(stores)
-      })
+      }),
+      replaceUrl: true
     });
   }
 
@@ -251,7 +255,8 @@ export class CategoryProductsComponent implements AfterViewInit {
           this._router.navigate([], {
             queryParams: Object.assign({}, params, {
               stores: this.convertToStoreParams(stores)
-            })
+            }),
+            replaceUrl: true
           });
         })
       )
@@ -266,7 +271,8 @@ export class CategoryProductsComponent implements AfterViewInit {
         priceTo: null,
         minRating: null,
         stores: this.convertToStoreParams(stores)
-      })
+      }),
+      replaceUrl: true
     });
   }
 
@@ -288,7 +294,8 @@ export class CategoryProductsComponent implements AfterViewInit {
                     sort: sortArray[0],
                     order: sortArray[1],
                     stores: this.convertToStoreParams(stores)
-                  })
+                  }),
+                  replaceUrl: true
                 });
               })
             ),
@@ -300,7 +307,8 @@ export class CategoryProductsComponent implements AfterViewInit {
                     priceFrom: formValue.priceFrom ? formValue.priceFrom : null,
                     priceTo: formValue.priceTo ? formValue.priceTo : null,
                     stores: this.convertToStoreParams(stores)
-                  })
+                  }),
+                  replaceUrl: true
                 });
               })
             )
