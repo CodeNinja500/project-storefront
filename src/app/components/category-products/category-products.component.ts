@@ -5,12 +5,14 @@ import { Observable, Subject, combineLatest, from, of } from 'rxjs';
 import { filter, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { CategoryModel } from '../../models/category.model';
 import { QueryParamsQueryModel } from '../../query-models/query-params.query-model';
+import { RatingQueryModel } from '../../query-models/rating.query-model';
 import { SortOptionModel } from '../../models/sort-option.model';
 import { ProductQueryModel } from '../../query-models/product.query-model';
+import { StoreModel } from '../../models/store.model';
 import { CategoriesService } from '../../services/categories.service';
 import { ProductsService } from '../../services/products.service';
+import { StoresService } from '../../services/stores.service';
 import { ProductModel } from '../../models/product.model';
-import { RatingQueryModel } from 'src/app/query-models/rating.query-model';
 
 @Component({
   selector: 'app-category-products',
@@ -112,12 +114,14 @@ export class CategoryProductsComponent implements AfterViewInit {
   public pages$: Observable<number[]> = this._pagesSubject.asObservable();
 
   readonly filterForm: FormGroup = new FormGroup({ priceFrom: new FormControl(), priceTo: new FormControl() });
+  readonly storeList$: Observable<StoreModel[]> = this._storesService.getAllStores();
 
   constructor(
     private _categoriesService: CategoriesService,
     private _activatedRoute: ActivatedRoute,
     private _productsService: ProductsService,
-    private _router: Router
+    private _router: Router,
+    private _storesService: StoresService
   ) {}
 
   mapToProductQueryModel(product: ProductModel): ProductQueryModel {
