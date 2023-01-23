@@ -97,7 +97,7 @@ export class CategoryProductsComponent implements AfterViewInit {
   private _pagesSubject: Subject<number[]> = new Subject<number[]>();
   public pages$: Observable<number[]> = this._pagesSubject.asObservable();
 
-  readonly priceRangeForm: FormGroup = new FormGroup({ priceFrom: new FormControl(), priceTo: new FormControl() });
+  readonly filterForm: FormGroup = new FormGroup({ priceFrom: new FormControl(), priceTo: new FormControl() });
 
   constructor(
     private _categoriesService: CategoriesService,
@@ -204,7 +204,7 @@ export class CategoryProductsComponent implements AfterViewInit {
                 });
               })
             ),
-            this.priceRangeForm.valueChanges.pipe(
+            this.filterForm.valueChanges.pipe(
               tap((formValue) => {
                 this._router.navigate([], {
                   queryParams: Object.assign({}, params, {
