@@ -15,11 +15,13 @@
                     </ul>
                     <div class="mt-4">
                         <h5>Stores</h5>
-                        <div *ngFor="let store of storeList$ | async" class="form-check mb-2">
-                            <input [id]="store.name" class="form-check-input" type="checkbox" [value]="store.id"
-                                (change)="onStoreFilterChanged(store.id)" [checked]="queryParams.stores.has(store.id)">
-                            <label [for]="store.name" class="form-check-label">{{store.name}}</label>
-                        </div>
+                        <form [formGroup]="storesForm">
+                            <div *ngFor="let store of storeList$ | async" class="form-check mb-2">
+                                <input [id]="store.name" class="form-check-input" [formControlName]='store.id' type="checkbox"
+                                    [value]="store.id">
+                                <label [for]="store.name" class="form-check-label">{{store.name}}</label>
+                            </div>
+                        </form>
                     </div>
                     <div class="mt-4">
                         <h5>Price</h5>
