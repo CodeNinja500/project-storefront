@@ -10,6 +10,7 @@ import { ProductQueryModel } from '../../query-models/product.query-model';
 import { CategoriesService } from '../../services/categories.service';
 import { ProductsService } from '../../services/products.service';
 import { ProductModel } from '../../models/product.model';
+import { RatingQueryModel } from 'src/app/query-models/rating.query-model';
 
 @Component({
   selector: 'app-category-products',
@@ -31,11 +32,20 @@ export class CategoryProductsComponent implements AfterViewInit {
       limit: params['limit'] ? Math.max(+params['limit'], 5) : 5,
       page: params['page'] ? Math.max(+params['page'], 1) : 1,
       priceFrom: params['priceFrom'] ?? null,
-      priceTo: params['priceTo'] ?? null
+      priceTo: params['priceTo'] ?? null,
+      minRating: params['minRating'] ?? null
     })),
     shareReplay(1),
     tap((data) => this.setControlFromQueryParams(data))
   );
+
+  readonly ratingOptions$: Observable<RatingQueryModel[]> = of([
+    { value: 5, stars: this.mapRatingNumberToStars(5) },
+    { value: 4, stars: this.mapRatingNumberToStars(4) },
+    { value: 3, stars: this.mapRatingNumberToStars(3) },
+    { value: 2, stars: this.mapRatingNumberToStars(2) },
+    { value: 1, stars: this.mapRatingNumberToStars(1) }
+  ]);
 
   readonly sortingOpts$: Observable<SortOptionModel[]> = of([
     { display: 'Featured', key: 'featureValue;desc' },
@@ -69,6 +79,7 @@ export class CategoryProductsComponent implements AfterViewInit {
   ]).pipe(
     map(([params, products]) =>
       products
+
         .sort((a, b) => {
           const prev = Object.assign(a);
           const next = Object.assign(b);
@@ -81,6 +92,7 @@ export class CategoryProductsComponent implements AfterViewInit {
         })
         .filter((product) => (params.priceFrom ? product.price >= params.priceFrom : true))
         .filter((product) => (params.priceTo ? product.price <= params.priceTo : true))
+        .filter((product) => (params['minRating'] ? product.ratingValue >= +params['minRating'] : true))
     ),
     shareReplay(1),
     tap((data) => this.calcNumberOfPages(data)),
@@ -189,6 +201,18 @@ export class CategoryProductsComponent implements AfterViewInit {
         })
       )
       .subscribe();
+  }
+
+  onMinRatingChanged(rating: number, params: QueryParamsQueryModel): void {
+    this._router.navigate([], {
+      queryParams: {
+        sort: params.sort,
+        order: params.order,
+        limit: params.limit,
+        page: params.page,
+        minRating: rating == params.minRating ? null : rating
+      }
+    });
   }
 
   ngAfterViewInit(): void {
