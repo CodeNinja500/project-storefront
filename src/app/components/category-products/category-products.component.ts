@@ -1,8 +1,8 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, combineLatest, from, of } from 'rxjs';
-import { filter, map, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
+import { Observable, Subject, combineLatest, from, of } from 'rxjs';
+import { filter, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { CategoryModel } from '../../models/category.model';
 import { QueryParamsQueryModel } from '../../query-models/query-params.query-model';
 import { SortOptionModel } from '../../models/sort-option.model';
@@ -27,7 +27,9 @@ export class CategoryProductsComponent implements AfterViewInit {
   readonly queryParams$: Observable<QueryParamsQueryModel> = this._activatedRoute.queryParams.pipe(
     map((params) => ({
       sort: params['sort'] ?? 'featureValue',
-      order: params['order'] ?? 'desc'
+      order: params['order'] ?? 'desc',
+      limit: params['limit'] ? Math.max(+params['limit'], 5) : 5,
+      page: params['page'] ? Math.max(+params['page'], 1) : 1
     })),
     shareReplay(1),
     tap((data) => this.setControlFromQueryParams(data))
@@ -56,6 +58,7 @@ export class CategoryProductsComponent implements AfterViewInit {
         )
     )
   );
+
   readonly sortForm: FormControl = new FormControl();
 
   readonly productsFilteredAndSorted$: Observable<ProductQueryModel[]> = combineLatest([
@@ -73,8 +76,21 @@ export class CategoryProductsComponent implements AfterViewInit {
           return params['order'] === 'asc' ? -1 : 1;
         } else return 0;
       })
-    )
+    ),
+    shareReplay(1),
+    tap((data) => this.calcNumberOfPages(data)),
+    tap((data) => this.checkPaginationAfterFilterAdded(data))
   );
+
+  readonly productsPaginated$: Observable<ProductQueryModel[]> = combineLatest([
+    this.productsFilteredAndSorted$,
+    this.queryParams$
+  ]).pipe(map(([products, params]) => products.slice((params.page - 1) * params.limit, params.page * params.limit)));
+
+  readonly limitOpts: Observable<number[]> = of([5, 10, 15]);
+
+  private _pagesSubject: Subject<number[]> = new Subject<number[]>();
+  public pages$: Observable<number[]> = this._pagesSubject.asObservable();
 
   constructor(
     private _categoriesService: CategoriesService,
@@ -118,15 +134,70 @@ export class CategoryProductsComponent implements AfterViewInit {
     this.sortForm.setValue(params.sort + ';' + params.order);
   }
 
-  ngAfterViewInit(): void {
-    this.sortForm.valueChanges.subscribe((value: string) => {
-      const sortArray = value.split(';');
-      this._router.navigate([], {
-        queryParams: {
-          sort: sortArray[0],
-          order: sortArray[1]
-        }
-      });
+  calcNumberOfPages(products: ProductQueryModel[]): void {
+    this.queryParams$
+      .pipe(
+        take(1),
+        tap((params: QueryParamsQueryModel) => {
+          this._pagesSubject.next(
+            Array.from(Array(Math.ceil(products.length / params.limit)).keys()).map((key) => key + 1)
+          );
+        })
+      )
+      .subscribe();
+  }
+
+  onPageChanged(page: number, queryParams: QueryParamsQueryModel): void {
+    this._router.navigate([], {
+      queryParams: Object.assign({}, queryParams, { page: page })
     });
+  }
+
+  onLimitChanged(limit: number, queryParams: QueryParamsQueryModel): void {
+    this.productsFilteredAndSorted$
+      .pipe(
+        take(1),
+        tap((products) => {
+          this._router.navigate([], {
+            queryParams: Object.assign({}, queryParams, {
+              limit: limit,
+              page: queryParams.page > products.length / limit ? Math.ceil(products.length / limit) : queryParams.page
+            })
+          });
+        })
+      )
+      .subscribe();
+  }
+
+  checkPaginationAfterFilterAdded(products: ProductQueryModel[]): void {
+    this.queryParams$
+      .pipe(
+        take(1),
+        tap((params) => {
+          if (params.page > Math.ceil(products.length / params.limit)) {
+            this._router.navigate([], {
+              queryParams: Object.assign({}, params, { page: Math.ceil(products.length / params.limit) })
+            });
+          }
+        })
+      )
+      .subscribe();
+  }
+
+  ngAfterViewInit(): void {
+    this.queryParams$
+      .pipe(
+        switchMap((params: QueryParamsQueryModel) =>
+          this.sortForm.valueChanges.pipe(
+            tap((formValue) => {
+              const sortArray = formValue.split(';');
+              this._router.navigate([], {
+                queryParams: Object.assign({}, params, { sort: sortArray[0], order: sortArray[1] })
+              });
+            })
+          )
+        )
+      )
+      .subscribe();
   }
 }
