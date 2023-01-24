@@ -22,7 +22,7 @@ import { ProductModel } from '../../models/product.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CategoryProductsComponent implements AfterViewInit {
-  readonly categoryList$: Observable<CategoryModel[]> = this._categoriesService.getAllCategories();
+  readonly categoryList$: Observable<CategoryModel[]> = this._categoriesService.getAllCategories().pipe(shareReplay(1));
   readonly categoryId$: Observable<string> = this._activatedRoute.params.pipe(
     map((params) => params['categoryId']),
     shareReplay(1)
@@ -118,7 +118,7 @@ export class CategoryProductsComponent implements AfterViewInit {
   public pages$: Observable<number[]> = this._pagesSubject.asObservable();
 
   readonly filterForm: FormGroup = new FormGroup({ priceFrom: new FormControl(), priceTo: new FormControl() });
-  readonly storeList$: Observable<StoreModel[]> = this._storesService.getAllStores();
+  readonly storeList$: Observable<StoreModel[]> = this._storesService.getAllStores().pipe(shareReplay(1));
 
   constructor(
     private _categoriesService: CategoriesService,
