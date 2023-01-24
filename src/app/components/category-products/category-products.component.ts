@@ -78,6 +78,8 @@ export class CategoryProductsComponent implements AfterViewInit {
 
   readonly sortForm: FormControl = new FormControl();
 
+  readonly storesForm: FormGroup = new FormGroup({});
+
   readonly productsFilteredAndSorted$: Observable<ProductQueryModel[]> = combineLatest([
     this.queryParams$,
     this.productInCategoryList$
@@ -120,11 +122,16 @@ export class CategoryProductsComponent implements AfterViewInit {
   public pages$: Observable<number[]> = this._pagesSubject.asObservable();
 
   readonly filterForm: FormGroup = new FormGroup({ priceFrom: new FormControl(), priceTo: new FormControl() });
-  readonly storesForm: FormGroup = new FormGroup({ store: new FormControl('') });
+
+  readonly storesNameForm: FormGroup = new FormGroup({ store: new FormControl('') });
+
+  readonly allStoresList$: Observable<StoreModel[]> = this._storesService
+    .getAllStores()
+    .pipe(tap((data) => this.onStoresCreateFormControls(data)));
 
   readonly storeList$: Observable<StoreModel[]> = combineLatest([
-    this.storesForm.valueChanges.pipe(startWith({ store: '' })),
-    this._storesService.getAllStores()
+    this.storesNameForm.valueChanges.pipe(startWith({ store: '' })),
+    this.allStoresList$
   ]).pipe(
     map(([formValue, stores]) =>
       stores.filter((store) => store.name.toLowerCase().includes(formValue.store.toLowerCase()))
@@ -253,28 +260,6 @@ export class CategoryProductsComponent implements AfterViewInit {
     });
   }
 
-  onStoreFilterChanged(storeId: string): void {
-    this.queryParams$
-      .pipe(
-        take(1),
-        tap((params) => {
-          const stores: Set<string> = params.stores;
-          if (!stores.has(storeId)) {
-            stores.add(storeId);
-          } else {
-            stores.delete(storeId);
-          }
-          this._router.navigate([], {
-            queryParams: Object.assign({}, params, {
-              stores: this.convertToStoreParams(stores)
-            }),
-            replaceUrl: true
-          });
-        })
-      )
-      .subscribe();
-  }
-
   onCategoryChanged(categoryId: string, params: QueryParamsQueryModel): void {
     const stores: Set<string> = params.stores;
     this._router.navigate(['/categories/' + categoryId], {
@@ -291,7 +276,6 @@ export class CategoryProductsComponent implements AfterViewInit {
   convertToStoreParams(stores: Set<string>): string | null {
     return Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null;
   }
-
   onFiltersShow(): void {
     this._isFilterShownSubject.next(true);
   }
@@ -299,6 +283,18 @@ export class CategoryProductsComponent implements AfterViewInit {
     this._isFilterShownSubject.next(false);
   }
 
+  onStoresCreateFormControls(stores: StoreModel[]): void {
+    this.queryParams$
+      .pipe(
+        take(1),
+        tap((params) => {
+          stores.forEach((store) =>
+            this.storesForm.addControl(store.id, new FormControl(params.stores.has(store.id) ? true : false))
+          );
+        })
+      )
+      .subscribe();
+  }
   ngAfterViewInit(): void {
     this.queryParams$
       .pipe(
@@ -326,6 +322,25 @@ export class CategoryProductsComponent implements AfterViewInit {
                     priceFrom: formValue.priceFrom ? formValue.priceFrom : null,
                     priceTo: formValue.priceTo ? formValue.priceTo : null,
                     stores: this.convertToStoreParams(stores)
+                  }),
+                  replaceUrl: true
+                });
+              })
+            ),
+            this.storesForm.valueChanges.pipe(
+              tap((values) => {
+                const storesArray = Object.keys(values)
+                  .reduce((acc: string[], curr: string) => {
+                    if (values[curr]) {
+                      return [...acc, curr];
+                    } else {
+                      return acc;
+                    }
+                  }, [])
+                  .sort();
+                this._router.navigate([], {
+                  queryParams: Object.assign({}, params, {
+                    stores: storesArray.length > 0 ? storesArray.join(',') : null
                   }),
                   replaceUrl: true
                 });
