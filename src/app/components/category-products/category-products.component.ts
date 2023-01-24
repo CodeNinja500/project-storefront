@@ -118,7 +118,17 @@ export class CategoryProductsComponent implements AfterViewInit {
   public pages$: Observable<number[]> = this._pagesSubject.asObservable();
 
   readonly filterForm: FormGroup = new FormGroup({ priceFrom: new FormControl(), priceTo: new FormControl() });
-  readonly storeList$: Observable<StoreModel[]> = this._storesService.getAllStores().pipe(shareReplay(1));
+  readonly storesForm: FormGroup = new FormGroup({ store: new FormControl('') });
+
+  readonly storeList$: Observable<StoreModel[]> = combineLatest([
+    this.storesForm.valueChanges.pipe(startWith({ store: '' })),
+    this._storesService.getAllStores()
+  ]).pipe(
+    map(([formValue, stores]) =>
+      stores.filter((store) => store.name.toLowerCase().includes(formValue.store.toLowerCase()))
+    ),
+    shareReplay(1)
+  );
 
   constructor(
     private _categoriesService: CategoriesService,

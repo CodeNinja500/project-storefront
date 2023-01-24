@@ -15,6 +15,9 @@
                     </ul>
                     <div class="mt-4">
                         <h5>Stores</h5>
+                        <form [formGroup]="storesForm">
+                            <input type="text" class="form-control mb-2" formControlName="store" placeholder="Search by store">
+                        </form>
                         <div *ngFor="let store of storeList$ | async" class="form-check mb-2">
                             <input [id]="store.name" class="form-check-input" type="checkbox" [value]="store.id"
                                 (change)="onStoreFilterChanged(store.id)" [checked]="queryParams.stores.has(store.id)">
