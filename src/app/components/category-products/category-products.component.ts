@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject, combineLatest, from, of } from 'rxjs';
 import { filter, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
@@ -29,7 +29,9 @@ export class CategoryProductsComponent implements AfterViewInit {
       sort: params['sort'] ?? 'featureValue',
       order: params['order'] ?? 'desc',
       limit: params['limit'] ? Math.max(+params['limit'], 5) : 5,
-      page: params['page'] ? Math.max(+params['page'], 1) : 1
+      page: params['page'] ? Math.max(+params['page'], 1) : 1,
+      priceFrom: params['priceFrom'] ?? null,
+      priceTo: params['priceTo'] ?? null
     })),
     shareReplay(1),
     tap((data) => this.setControlFromQueryParams(data))
@@ -66,16 +68,19 @@ export class CategoryProductsComponent implements AfterViewInit {
     this.productInCategoryList$
   ]).pipe(
     map(([params, products]) =>
-      products.sort((a, b) => {
-        const prev = Object.assign(a);
-        const next = Object.assign(b);
-        if (prev[params['sort']] > next[params['sort']]) {
-          return params['order'] === 'asc' ? 1 : -1;
-        }
-        if (prev[params['sort']] < next[params['sort']]) {
-          return params['order'] === 'asc' ? -1 : 1;
-        } else return 0;
-      })
+      products
+        .sort((a, b) => {
+          const prev = Object.assign(a);
+          const next = Object.assign(b);
+          if (prev[params['sort']] > next[params['sort']]) {
+            return params['order'] === 'asc' ? 1 : -1;
+          }
+          if (prev[params['sort']] < next[params['sort']]) {
+            return params['order'] === 'asc' ? -1 : 1;
+          } else return 0;
+        })
+        .filter((product) => (params.priceFrom ? product.price >= params.priceFrom : true))
+        .filter((product) => (params.priceTo ? product.price <= params.priceTo : true))
     ),
     shareReplay(1),
     tap((data) => this.calcNumberOfPages(data)),
@@ -91,6 +96,8 @@ export class CategoryProductsComponent implements AfterViewInit {
 
   private _pagesSubject: Subject<number[]> = new Subject<number[]>();
   public pages$: Observable<number[]> = this._pagesSubject.asObservable();
+
+  readonly filterForm: FormGroup = new FormGroup({ priceFrom: new FormControl(), priceTo: new FormControl() });
 
   constructor(
     private _categoriesService: CategoriesService,
@@ -188,14 +195,26 @@ export class CategoryProductsComponent implements AfterViewInit {
     this.queryParams$
       .pipe(
         switchMap((params: QueryParamsQueryModel) =>
-          this.sortForm.valueChanges.pipe(
-            tap((formValue) => {
-              const sortArray = formValue.split(';');
-              this._router.navigate([], {
-                queryParams: Object.assign({}, params, { sort: sortArray[0], order: sortArray[1] })
-              });
-            })
-          )
+          combineLatest([
+            this.sortForm.valueChanges.pipe(
+              tap((formValue) => {
+                const sortArray = formValue.split(';');
+                this._router.navigate([], {
+                  queryParams: Object.assign({}, params, { sort: sortArray[0], order: sortArray[1] })
+                });
+              })
+            ),
+            this.filterForm.valueChanges.pipe(
+              tap((formValue) => {
+                this._router.navigate([], {
+                  queryParams: Object.assign({}, params, {
+                    priceFrom: formValue.priceFrom ? formValue.priceFrom : null,
+                    priceTo: formValue.priceTo ? formValue.priceTo : null
+                  })
+                });
+              })
+            )
+          ])
         )
       )
       .subscribe();

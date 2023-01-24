@@ -3,4 +3,6 @@ export interface QueryParamsQueryModel {
   readonly order: string;
   readonly limit: number;
   readonly page: number;
+  readonly priceFrom?: number;
+  readonly priceTo?: number;
 }

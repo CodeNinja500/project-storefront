@@ -7,12 +7,19 @@
                         <div class="mb-4">
                             <h5>Categories</h5>
                         </div>
+                        <ul class="nav nav-category">
+                            <li *ngFor="let item of categoryList$ | async" class="nav-item border-bottom w-100"><a class="nav-link"
+                                    [routerLink]="'/categories/'+item.id" role="button">{{item.name}}<i
+                                        class="feather-icon icon-chevron-right"></i></a></li>
+                        </ul>
+                        <div class="mt-4">
+                            <h5>Price</h5>
+                            <form [formGroup]="filterForm">
+                                <input type="text" class="form-control mb-2" formControlName="priceFrom" placeholder="Price From">
+                                <input type="text" class="form-control mb-2" formControlName="priceTo" placeholder="Price To">
+                            </form>
+                        </div>
                     </div>
-                    <ul class="nav nav-category">
-                        <li *ngFor="let item of categoryList$ | async" class="nav-item border-bottom w-100"><a class="nav-link"
-                                [routerLink]="'/categories/'+item.id" role="button">{{item.name}}<i
-                                    class="feather-icon icon-chevron-right"></i></a></li>
-                    </ul>
                 </div>
                 <div class="col-12 col-lg-9 col-md-8">
                     <ng-container>
@@ -83,7 +90,7 @@
                             </div>
                         </div>
                     </section>
-                    <div class='d-flex justify-content-around'>
+                    <div class='d-flex justify-content-around flex-wrap'>
                         <div>
                             <span>Page</span>
                             <nav>
