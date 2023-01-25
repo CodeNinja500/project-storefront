@@ -2,54 +2,70 @@
     <ng-container *ngIf="queryParams$|async as queryParams">
         <div class="container">
             <div class="row">
-                <div class="col-12 col-lg-3 col-md-4 mb-4 mb-md-0">
-                    <div class="col-12">
-                        <div class="mb-4">
-                            <h5>Categories</h5>
+                <aside class="col-lg-3 col-sm-3 mb-6 mb-md-0">
+                    <div class="offcanvas offcanvas-start offcanvas-collapse w-md-50" [ngClass]="{show: isFilterShown$|async}" tabindex="-1"
+                        id="offcanvasCategory" aria-labelledby="offcanvasCategoryLabel" bis_skin_checked="1">
+
+                        <div class="offcanvas-header d-lg-none" bis_skin_checked="1">
+                            <h5 class="offcanvas-title" id="offcanvasCategoryLabel">Filter</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"
+                                (click)="onFiltersHide()"></button>
                         </div>
-                    </div>
-                    <ul class="nav nav-category">
-                        <li *ngFor="let item of categoryList$ | async" class="nav-item border-bottom w-100"><a class="nav-link"
-                                (click)="onCategoryChanged(item.id,queryParams )" role="button">{{item.name}}<i
-                                    class="feather-icon icon-chevron-right"></i></a></li>
-                    </ul>
-                    <div class="mt-4">
-                        <h5>Stores</h5>
-                        <form [formGroup]="storesNameForm">
-                            <input type="text" class="form-control mb-2" formControlName="store" placeholder="Search by store">
-                        </form>
-                        <form [formGroup]="storesForm">
-                            <div *ngFor="let store of storeList$ | async" class="form-check mb-2">
-                                <input [id]="store.name" class="form-check-input" [formControlName]='store.id' type="checkbox"
-                                    [value]="store.id">
-                                <label [for]="store.name" class="form-check-label">{{store.name}}</label>
+                        <div class="offcanvas-body ps-lg-2 pt-lg-0" bis_skin_checked="1">
+                            <div class="mb-8" bis_skin_checked="1">
+                                <div class="col-12">
+                                    <div class="mb-4">
+                                        <h5>Categories</h5>
+                                    </div>
+                                </div>
+                                <ul class="nav nav-category">
+                                    <li *ngFor="let item of categoryList$ | async" class="nav-item border-bottom w-100"><a class="nav-link"
+                                            (click)="onCategoryChanged(item.id,queryParams ); onFiltersHide()" role="button">{{item.name}}<i
+                                                class="feather-icon icon-chevron-right"></i></a></li>
+                                </ul>
+                                <div class="mt-4">
+                                    <h5>Stores</h5>
+                                    <form [formGroup]="storesNameForm">
+                                        <input type="text" class="form-control mb-2" formControlName="store" placeholder="Search by store">
+                                    </form>
+                                    <form [formGroup]="storesForm">
+                                        <div *ngFor="let store of storeList$ | async" class="form-check mb-2">
+                                            <input [id]="store.name" class="form-check-input" [formControlName]='store.id' type="checkbox"
+                                                [value]="store.id">
+                                            <label [for]="store.name" class="form-check-label">{{store.name}}</label>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="mt-4">
+                                    <h5>Price</h5>
+                                    <form [formGroup]="filterForm">
+                                        <input type="text" class="form-control mb-2" formControlName="priceFrom" placeholder="Price From">
+                                        <input type="text" class="form-control mb-2" formControlName="priceTo" placeholder="Price To">
+                                    </form>
+                                </div>
+                                <div class="mt-4">
+                                    <h5>Rating</h5>
+                                    <div *ngFor="let rating of ratingOptions$ | async" class="form-check mb-2">
+                                        <input [id]="rating" class="form-check-input" type="radio" name="item"
+                                            [checked]="rating.value==queryParams.minRating"
+                                            (click)="onMinRatingChanged(rating.value,queryParams)">
+                                        <label [for]="rating" class="form-check-label">
+                                            <small class="text-warning">
+                                                <i *ngFor="let val of rating.stars" class="bi"
+                                                    [ngClass]="{'bi-star-fill': val === 1, 'bi-star': val === 0, 'bi-star-half': val === 0.5}">
+                                                </i>
+                                                ({{rating.value}})
+                                            </small>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
-                        </form>
-                    </div>
-                    <div class="mt-4">
-                        <h5>Price</h5>
-                        <form [formGroup]="filterForm">
-                            <input type="text" class="form-control mb-2" formControlName="priceFrom" placeholder="Price From">
-                            <input type="text" class="form-control mb-2" formControlName="priceTo" placeholder="Price To">
-                        </form>
-                    </div>
-                    <div class="mt-4">
-                        <h5>Rating</h5>
-                        <div *ngFor="let rating of ratingOptions$ | async" class="form-check mb-2">
-                            <input [id]="rating" class="form-check-input" type="radio" name="item"
-                                [checked]="rating.value==queryParams.minRating" (click)="onMinRatingChanged(rating.value,queryParams)">
-                            <label [for]="rating" class="form-check-label">
-                                <small class="text-warning">
-                                    <i *ngFor="let val of rating.stars" class="bi"
-                                        [ngClass]="{'bi-star-fill': val === 1, 'bi-star': val === 0, 'bi-star-half': val === 0.5}">
-                                    </i>
-                                    ({{rating.value}})
-                                </small>
-                            </label>
+
+
                         </div>
                     </div>
-                </div>
-                <div class="col-12 col-lg-9 col-md-8">
+                </aside>
+                <div class="col-12 col-lg-9">
                     <ng-container>
                         <!-- card -->
                         <div class="card mb-4 bg-light border-0">
@@ -67,6 +83,17 @@
                                     <div class="col-12 d-flex justify-content-between align-items-center flex-wrap">
                                         <div class="mb-4">
                                             <h6>{{productsBeforePagination.length}} <small class="text-muted"> products found</small></h6>
+                                        </div>
+                                        <div class='mb-4'>
+                                            <a class="btn btn-outline-gray-400 text-muted" data-bs-toggle="collapse" role="button"
+                                                aria-expanded="true" aria-controls="collapseFilter" (click)="onFiltersShow()">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round" class="feather feather-filter me-2">
+                                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                                                </svg>
+                                                Filters
+                                            </a>
                                         </div>
                                         <div>
                                             <!-- select option -->

@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subject, combineLatest, from, of } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, combineLatest, from, of } from 'rxjs';
 import { filter, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { CategoryModel } from '../../models/category.model';
 import { QueryParamsQueryModel } from '../../query-models/query-params.query-model';
@@ -22,6 +22,8 @@ import { ProductModel } from '../../models/product.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CategoryProductsComponent implements AfterViewInit {
+  private _isFilterShownSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public isFilterShown$: Observable<boolean> = this._isFilterShownSubject.asObservable();
   readonly categoryList$: Observable<CategoryModel[]> = this._categoriesService.getAllCategories().pipe(shareReplay(1));
   readonly categoryId$: Observable<string> = this._activatedRoute.params.pipe(
     map((params) => params['categoryId']),
@@ -274,6 +276,12 @@ export class CategoryProductsComponent implements AfterViewInit {
   convertToStoreParams(stores: Set<string>): string | null {
     return Array.from(stores).sort().join().length > 0 ? Array.from(stores).sort().join() : null;
   }
+  onFiltersShow(): void {
+    this._isFilterShownSubject.next(true);
+  }
+  onFiltersHide(): void {
+    this._isFilterShownSubject.next(false);
+  }
 
   onStoresCreateFormControls(stores: StoreModel[]): void {
     this.queryParams$
@@ -287,7 +295,6 @@ export class CategoryProductsComponent implements AfterViewInit {
       )
       .subscribe();
   }
-
   ngAfterViewInit(): void {
     this.queryParams$
       .pipe(

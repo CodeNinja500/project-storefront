@@ -6,45 +6,41 @@
             </div>
         </div>
     </div>
-    <div class="navbar navbar-expand-lg navbar-light py-lg-4 pt-3 px-0 pb-0">
+    <div class="navbar navbar-light py-lg-4 pt-3 px-0 pb-0">
         <div class="container">
             <div class="row w-100 align-items-center g-lg-2 g-0">
-                <div class="col-xxl-2 col-lg-3">
-                    <a class="navbar-brand d-none d-lg-block" routerLink="/">
-                        <img src="/assets/images/logo/freshcart-logo.svg" alt="eCommerce HTML Template">
-                    </a>
-                    <div class="d-flex justify-content-between w-100 d-lg-none">
-                        <a class="navbar-brand" routerLink="/">
-                            <img src="/assets/images/logo/freshcart-logo.svg" alt="eCommerce HTML Template">
-                        </a>
+                <div class="col-xxl-2 col-lg-3"> <a class="navbar-brand d-none d-lg-block" routerLink="/"> <img
+                            src="/assets/images/logo/freshcart-logo.svg" alt="eCommerce HTML Template"> </a>
+                    <div class="d-flex justify-content-between w-100 d-lg-none"> <a class="navbar-brand" routerLink="/"> <img
+                                src="/assets/images/logo/freshcart-logo.svg" alt="eCommerce HTML Template"> </a>
                         <div class="d-flex align-items-center lh-1"> <!-- Button -->
                             <button class="navbar-toggler collapsed" type="button" aria-controls="navbar-default"
-                                aria-label="Toggle navigation">
+                                aria-label="Toggle navigation" (click)="onMenuShow()">
                                 <span class="icon-bar top-bar mt-0"></span>
-                                <span class="icon-bar middle-bar"></span>
-                                <span class="icon-bar bottom-bar"></span>
+                                <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span>
                             </button>
                         </div>
                     </div>
                 </div>
-                <ul class="navbar-nav">
-                    <li *ngFor="let category of categoryList$ | async" class="nav-item"><a class="nav-link fs-6"
-                            [routerLink]="'/categories/'+ category.id" role="button">{{category.name}}</a>
-                    </li>
-                </ul>
             </div>
         </div>
     </div>
-
 </header>
 <div class="border-bottom pb-lg-4 pb-3">
     <nav class="navbar navbar-expand-lg navbar-light navbar-default pt-0 pb-0">
         <div class="container px-0 px-md-3">
-            <div class="offcanvas offcanvas-start p-4 p-lg-0">
-                <div class="d-flex justify-content-between align-items-center mb-2 d-block d-lg-none"> <a routerLink="/"><img
-                            src="/assets/images/logo/freshcart-logo.svg" alt="eCommerce HTML Template"></a> <button type="button"
-                        class="btn-close" aria-label="Close"></button> </div>
-                <div class="d-block"> </div>
+            <div class="offcanvas offcanvas-start p-4 p-lg-0" [ngClass]="{show: isMenuVisible$|async}">
+                <div class="d-flex justify-content-between align-items-center mb-2 d-block d-lg-none">
+                    <a routerLink="/"><img src="/assets/images/logo/freshcart-logo.svg" alt="eCommerce HTML Template"></a>
+                    <button type="button" class="btn-close" aria-label="Close" (click)="onMenuHide()"></button>
+                </div>
+                <div class="d-block">
+                    <ul class="navbar-nav">
+                        <li *ngFor="let category of categoryList$ | async" class="nav-item"><a class="nav-link fs-6"
+                                [routerLink]="'/categories/'+ category.id" role="button" (click)="onMenuHide()">{{category.name}}</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
