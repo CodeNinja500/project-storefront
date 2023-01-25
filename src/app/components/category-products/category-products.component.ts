@@ -2,7 +2,7 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, ViewEncapsulation } 
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, Observable, Subject, combineLatest, from, of } from 'rxjs';
-import { filter, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
+import { debounceTime, filter, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { CategoryModel } from '../../models/category.model';
 import { QueryParamsQueryModel } from '../../query-models/query-params.query-model';
 import { RatingQueryModel } from '../../query-models/rating.query-model';
@@ -40,8 +40,7 @@ export class CategoryProductsComponent implements AfterViewInit {
       minRating: params['minRating'] ?? null,
       stores: params['stores'] ? new Set<string>(params['stores'].split(',')) : new Set<string>([])
     })),
-    shareReplay(1),
-    tap((data) => this.setControlFromQueryParams(data))
+    shareReplay(1)
   );
 
   readonly ratingOptions$: Observable<RatingQueryModel[]> = of([
@@ -57,7 +56,12 @@ export class CategoryProductsComponent implements AfterViewInit {
     { display: 'Price Low to High', key: 'price;asc' },
     { display: 'Price High to Low', key: 'price;desc' },
     { display: 'Avg. Rating', key: 'ratingValue;desc' }
-  ]);
+  ]).pipe(
+    tap((_) => {
+      this.onSetSortControls();
+      this.onSetPriceControls();
+    })
+  );
 
   readonly categoryDetails$: Observable<CategoryModel> = this.categoryId$.pipe(
     switchMap((categoryId) => this._categoriesService.getSingleCategoryById(categoryId))
@@ -178,12 +182,28 @@ export class CategoryProductsComponent implements AfterViewInit {
     return starsArray;
   }
 
-  setControlFromQueryParams(params: QueryParamsQueryModel): void {
-    this.sortForm.setValue(params.sort + ';' + params.order);
-    this.filterForm.setValue({
-      priceFrom: params.priceFrom,
-      priceTo: params.priceTo
-    });
+  onSetSortControls(): void {
+    this.queryParams$
+      .pipe(
+        take(1),
+        tap((params) => {
+          this.sortForm.setValue(params.sort + ';' + params.order);
+        })
+      )
+      .subscribe();
+  }
+
+  onSetPriceControls(): void {
+    this.queryParams$
+      .pipe(
+        take(1),
+        tap((params) => {
+          console.log('price set');
+          this.filterForm.patchValue({ priceTo: params.priceTo });
+          this.filterForm.patchValue({ priceFrom: params.priceFrom });
+        })
+      )
+      .subscribe();
   }
 
   calcNumberOfPages(products: ProductQueryModel[]): void {
@@ -255,7 +275,8 @@ export class CategoryProductsComponent implements AfterViewInit {
       queryParams: Object.assign({}, params, {
         minRating: rating == params.minRating ? null : rating,
         stores: this.convertToStoreParams(stores)
-      })
+      }),
+      replaceUrl: true
     });
   }
 
@@ -267,7 +288,8 @@ export class CategoryProductsComponent implements AfterViewInit {
         priceTo: null,
         minRating: null,
         stores: this.convertToStoreParams(stores)
-      })
+      }),
+      replaceUrl: true
     });
   }
 
@@ -280,7 +302,6 @@ export class CategoryProductsComponent implements AfterViewInit {
   onFiltersHide(): void {
     this._isFilterShownSubject.next(false);
   }
-
   onStoresCreateFormControls(stores: StoreModel[]): void {
     this.queryParams$
       .pipe(
@@ -294,59 +315,127 @@ export class CategoryProductsComponent implements AfterViewInit {
       .subscribe();
   }
   ngAfterViewInit(): void {
-    this.queryParams$
-      .pipe(
-        switchMap((params: QueryParamsQueryModel) =>
-          combineLatest([
-            this.sortForm.valueChanges.pipe(
-              tap((formValue) => {
-                const stores: Set<string> = params.stores;
-                const sortArray = formValue.split(';');
-                this._router.navigate([], {
-                  queryParams: Object.assign({}, params, {
-                    sort: sortArray[0],
-                    order: sortArray[1],
-                    stores: this.convertToStoreParams(stores)
-                  }),
-                  replaceUrl: true
-                });
-              })
-            ),
-            this.filterForm.valueChanges.pipe(
-              tap((formValue) => {
-                const stores: Set<string> = params.stores;
-                this._router.navigate([], {
-                  queryParams: Object.assign({}, params, {
-                    priceFrom: formValue.priceFrom ? formValue.priceFrom : null,
-                    priceTo: formValue.priceTo ? formValue.priceTo : null,
-                    stores: this.convertToStoreParams(stores)
-                  }),
-                  replaceUrl: true
-                });
-              })
-            ),
-            this.storesForm.valueChanges.pipe(
-              tap((values) => {
-                const storesArray = Object.keys(values)
-                  .reduce((acc: string[], curr: string) => {
-                    if (values[curr]) {
-                      return [...acc, curr];
-                    } else {
-                      return acc;
-                    }
-                  }, [])
-                  .sort();
-                this._router.navigate([], {
-                  queryParams: Object.assign({}, params, {
-                    stores: storesArray.length > 0 ? storesArray.join(',') : null
-                  }),
-                  replaceUrl: true
-                });
-              })
-            )
-          ])
+    combineLatest([
+      this.sortForm.valueChanges.pipe(
+        switchMap((sortValue) =>
+          this.queryParams$.pipe(
+            take(1),
+            tap((params) => {
+              const stores: Set<string> = params.stores;
+              const sortArray = sortValue.split(';');
+              this._router.navigate([], {
+                queryParams: Object.assign({}, params, {
+                  sort: sortArray[0],
+                  order: sortArray[1],
+                  stores: this.convertToStoreParams(stores)
+                }),
+                replaceUrl: true
+              });
+            })
+          )
+        )
+      ),
+      this.filterForm.valueChanges.pipe(
+        debounceTime(500),
+        tap((filterValue) => {}),
+        switchMap((filterValues) =>
+          this.queryParams$.pipe(
+            take(1),
+            tap((params) => {
+              const stores: Set<string> = params.stores;
+              this._router.navigate([], {
+                queryParams: Object.assign({}, params, {
+                  priceFrom:
+                    filterValues.priceFrom && filterValues.priceFrom.length > 0 ? filterValues.priceFrom : null,
+                  priceTo: filterValues.priceTo && filterValues.priceTo.length > 0 ? filterValues.priceTo : null,
+                  stores: this.convertToStoreParams(stores)
+                }),
+                replaceUrl: true
+              });
+            })
+          )
+        )
+      ),
+      this.storesForm.valueChanges.pipe(
+        tap((storesValue) => {}),
+        switchMap((storesValue) =>
+          this.queryParams$.pipe(
+            take(1),
+            tap((params) => {
+              const storesArray = Object.keys(storesValue)
+                .reduce((acc: string[], curr: string) => {
+                  if (storesValue[curr]) {
+                    return [...acc, curr];
+                  } else {
+                    return acc;
+                  }
+                }, [])
+                .sort();
+              this._router.navigate([], {
+                queryParams: Object.assign({}, params, {
+                  stores: storesArray.length > 0 ? storesArray.join(',') : null
+                }),
+                replaceUrl: true
+              });
+            })
+          )
         )
       )
-      .subscribe();
+    ]).subscribe();
+
+    // this.queryParams$
+    //   .pipe(
+    //     switchMap((params: QueryParamsQueryModel) =>
+    //       combineLatest([
+    //         this.sortForm.valueChanges.pipe(
+    //           tap((formValue) => {
+    //             const stores: Set<string> = params.stores;
+    //             const sortArray = formValue.split(';');
+    //             this._router.navigate([], {
+    //               queryParams: Object.assign({}, params, {
+    //                 sort: sortArray[0],
+    //                 order: sortArray[1],
+    //                 stores: this.convertToStoreParams(stores)
+    //               }),
+    //               replaceUrl: true
+    //             });
+    //           })
+    //         ),
+    //         this.filterForm.valueChanges.pipe(
+    //           tap((formValue) => {
+    //             const stores: Set<string> = params.stores;
+    //             this._router.navigate([], {
+    //               queryParams: Object.assign({}, params, {
+    //                 priceFrom: formValue.priceFrom ? formValue.priceFrom : null,
+    //                 priceTo: formValue.priceTo ? formValue.priceTo : null,
+    //                 stores: this.convertToStoreParams(stores)
+    //               }),
+    //               replaceUrl: true
+    //             });
+    //           })
+    //         ),
+    //         this.storesForm.valueChanges.pipe(
+    //           tap((values) => {
+    //             const storesArray = Object.keys(values)
+    //               .reduce((acc: string[], curr: string) => {
+    //                 if (values[curr]) {
+    //                   return [...acc, curr];
+    //                 } else {
+    //                   return acc;
+    //                 }
+    //               }, [])
+    //               .sort();
+    //             this._router.navigate([], {
+    //               queryParams: Object.assign({}, params, {
+    //                 stores: storesArray.length > 0 ? storesArray.join(',') : null
+    //               }),
+    //               replaceUrl: true
+    //             });
+    //           })
+    //         )
+    //       ])
+    //     )
+    //   )
+    //   .subscribe();
   }
 }
