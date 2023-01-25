@@ -198,7 +198,6 @@ export class CategoryProductsComponent implements AfterViewInit {
       .pipe(
         take(1),
         tap((params) => {
-          console.log('price set');
           this.filterForm.patchValue({ priceTo: params.priceTo });
           this.filterForm.patchValue({ priceFrom: params.priceFrom });
         })
