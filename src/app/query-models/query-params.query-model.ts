@@ -6,4 +6,5 @@ export interface QueryParamsQueryModel {
   readonly priceFrom?: number;
   readonly priceTo?: number;
   readonly minRating?: number;
+  readonly stores: Set<string>;
 }

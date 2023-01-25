@@ -10,9 +10,19 @@
                     </div>
                     <ul class="nav nav-category">
                         <li *ngFor="let item of categoryList$ | async" class="nav-item border-bottom w-100"><a class="nav-link"
-                                [routerLink]="'/categories/'+item.id" role="button">{{item.name}}<i
+                                (click)="onCategoryChanged(item.id,queryParams )" role="button">{{item.name}}<i
                                     class="feather-icon icon-chevron-right"></i></a></li>
                     </ul>
+                    <div class="mt-4">
+                        <h5>Stores</h5>
+                        <form [formGroup]="storesForm">
+                            <div *ngFor="let store of storeList$ | async" class="form-check mb-2">
+                                <input [id]="store.name" class="form-check-input" [formControlName]='store.id' type="checkbox"
+                                    [value]="store.id">
+                                <label [for]="store.name" class="form-check-label">{{store.name}}</label>
+                            </div>
+                        </form>
+                    </div>
                     <div class="mt-4">
                         <h5>Price</h5>
                         <form [formGroup]="filterForm">
@@ -47,53 +57,57 @@
                         </div>
                     </ng-container>
                     <section class="my-lg-2 my-1">
-                        <div class="container" *ngIf="productsPaginated$ | async as products">
-                            <div class="row">
-                                <div class="col-12 d-flex justify-content-between align-items-center flex-wrap">
-                                    <div class="mb-4">
-                                        <h6>{{products.length}} <small class="text-muted"> products found</small></h6>
-                                    </div>
-                                    <div>
-                                        <!-- select option -->
-                                        <select class="form-select" [formControl]='sortForm'>
-                                            <option *ngFor="let option of sortingOpts$|async" [value]="option.key">
-                                                {{option.display}}
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class='row g-4 row-cols-1 mt2'>
-                                    <div *ngFor="let product of products" class="col-12">
-                                        <div class="card card-product">
-                                            <div class="card-body">
-                                                <div class="row align-items-center">
-                                                    <div class='col-12 col-md-4'>
+                        <ng-container *ngIf="productsFilteredAndSorted$|async as productsBeforePagination">
 
-                                                        <div class="text-center position-relative">
-                                                            <!-- img -->
-                                                            <a><img [src]="product.imageUrl" [alt]="product.name" class="mb-3 img-fluid">
-                                                            </a>
+                            <div class="container" *ngIf="productsPaginated$ | async as products">
+                                <div class="row">
+                                    <div class="col-12 d-flex justify-content-between align-items-center flex-wrap">
+                                        <div class="mb-4">
+                                            <h6>{{productsBeforePagination.length}} <small class="text-muted"> products found</small></h6>
+                                        </div>
+                                        <div>
+                                            <!-- select option -->
+                                            <select class="form-select" [formControl]='sortForm'>
+                                                <option *ngFor="let option of sortingOpts$|async" [value]="option.key">
+                                                    {{option.display}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class='row g-4 row-cols-1 mt2'>
+                                        <div *ngFor="let product of products" class="col-12">
+                                            <div class="card card-product">
+                                                <div class="card-body">
+                                                    <div class="row align-items-center">
+                                                        <div class='col-12 col-md-4'>
+
+                                                            <div class="text-center position-relative">
+                                                                <!-- img -->
+                                                                <a><img [src]="product.imageUrl" [alt]="product.name"
+                                                                        class="mb-3 img-fluid">
+                                                                </a>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class='col-12 col-md-8 flex-grow-1'>
-                                                        <!--category-->
-                                                        <h3 class='fs-6 text-muted'>{{category.name}}</h3>
-                                                        <!-- title -->
-                                                        <h2 class="fs-6">{{product.name}}</h2>
-                                                        <!--rating -->
-                                                        <small class="text-warning">
-                                                            <i *ngFor="let val of product.ratingStars" class="bi"
-                                                                [ngClass]="{'bi-star-fill': val === 1, 'bi-star': val === 0, 'bi-star-half': val === 0.5}">
-                                                            </i>
-                                                            {{product.ratingValue}}
-                                                        </small>
-                                                        <span class='text-muted small'>
-                                                            ({{product.ratingCount}})
-                                                        </span>
-                                                        <!-- price -->
-                                                        <div class="d-flex justify-content-between align-items-center mt-3">
-                                                            <div>
-                                                                <span class="text-dark">{{product.price|currency}}</span><br>
+                                                        <div class='col-12 col-md-8 flex-grow-1'>
+                                                            <!--category-->
+                                                            <h3 class='fs-6 text-muted'>{{category.name}}</h3>
+                                                            <!-- title -->
+                                                            <h2 class="fs-6">{{product.name}}</h2>
+                                                            <!--rating -->
+                                                            <small class="text-warning">
+                                                                <i *ngFor="let val of product.ratingStars" class="bi"
+                                                                    [ngClass]="{'bi-star-fill': val === 1, 'bi-star': val === 0, 'bi-star-half': val === 0.5}">
+                                                                </i>
+                                                                {{product.ratingValue}}
+                                                            </small>
+                                                            <span class='text-muted small'>
+                                                                ({{product.ratingCount}})
+                                                            </span>
+                                                            <!-- price -->
+                                                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                                                <div>
+                                                                    <span class="text-dark">{{product.price|currency}}</span><br>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -103,7 +117,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </ng-container>
                     </section>
                     <div class='d-flex justify-content-around flex-wrap'>
                         <div>
