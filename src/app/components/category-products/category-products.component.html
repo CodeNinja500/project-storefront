@@ -84,7 +84,7 @@
                                         <div class="mb-4">
                                             <h6>{{productsBeforePagination.length}} <small class="text-muted"> products found</small></h6>
                                         </div>
-                                        <div class='mb-4'>
+                                        <div class='mb-4 d-lg-none'>
                                             <a class="btn btn-outline-gray-400 text-muted" data-bs-toggle="collapse" role="button"
                                                 aria-expanded="true" aria-controls="collapseFilter" (click)="onFiltersShow()">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
@@ -95,7 +95,7 @@
                                                 Filters
                                             </a>
                                         </div>
-                                        <div>
+                                        <div class='mb-4'>
                                             <!-- select option -->
                                             <select class="form-select" [formControl]='sortForm'>
                                                 <option *ngFor="let option of sortingOpts$|async" [value]="option.key">
