@@ -15,6 +15,9 @@
                     </ul>
                     <div class="mt-4">
                         <h5>Stores</h5>
+                        <form [formGroup]="storesNameForm">
+                            <input type="text" class="form-control mb-2" formControlName="store" placeholder="Search by store">
+                        </form>
                         <form [formGroup]="storesForm">
                             <div *ngFor="let store of storeList$ | async" class="form-check mb-2">
                                 <input [id]="store.name" class="form-check-input" [formControlName]='store.id' type="checkbox"
