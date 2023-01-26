@@ -10,7 +10,7 @@
         </div>
         <div class="row">
             <div *ngFor="let category of categoryList$ | async" class="col-12 col-sm-6 col-md-4 col-lg-3">
-                <a [routerLink]="'/categories/'+ category.id" class="text-decoration-none text-inherit">
+                <a class="text-decoration-none text-inherit" (click)="onCategoryChanged(category.id)">
                     <!-- card -->
                     <div class="card card-product mb-3">
                         <div class="card-body text-center py-8">

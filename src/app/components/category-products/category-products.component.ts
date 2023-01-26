@@ -1,10 +1,11 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, Observable, Subject, combineLatest, from, of } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject, Subject, combineLatest, from, of } from 'rxjs';
 import { debounceTime, filter, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { CategoryModel } from '../../models/category.model';
 import { QueryParamsQueryModel } from '../../query-models/query-params.query-model';
+import { PaginatorModel } from '../../models/paginator.model';
 import { RatingQueryModel } from '../../query-models/rating.query-model';
 import { SortOptionModel } from '../../models/sort-option.model';
 import { ProductQueryModel } from '../../query-models/product.query-model';
@@ -21,7 +22,7 @@ import { ProductModel } from '../../models/product.model';
   encapsulation: ViewEncapsulation.Emulated,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CategoryProductsComponent implements AfterViewInit {
+export class CategoryProductsComponent implements AfterViewInit, OnInit {
   private _isFilterShownSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public isFilterShown$: Observable<boolean> = this._isFilterShownSubject.asObservable();
   readonly categoryList$: Observable<CategoryModel[]> = this._categoriesService.getAllCategories().pipe(shareReplay(1));
@@ -40,8 +41,12 @@ export class CategoryProductsComponent implements AfterViewInit {
       minRating: params['minRating'] ?? null,
       stores: params['stores'] ? new Set<string>(params['stores'].split(',')) : new Set<string>([])
     })),
-    shareReplay(1)
+    shareReplay(1),
+    tap((data) => this.setPaginatorOnQueryParams(data.page, data.limit))
   );
+
+  private _paginatorSubject: ReplaySubject<PaginatorModel> = new ReplaySubject<PaginatorModel>(1);
+  public paginator$: Observable<PaginatorModel> = this._paginatorSubject.asObservable();
 
   readonly ratingOptions$: Observable<RatingQueryModel[]> = of([
     { value: 5, stars: this.mapRatingNumberToStars(5) },
@@ -56,12 +61,7 @@ export class CategoryProductsComponent implements AfterViewInit {
     { display: 'Price Low to High', key: 'price;asc' },
     { display: 'Price High to Low', key: 'price;desc' },
     { display: 'Avg. Rating', key: 'ratingValue;desc' }
-  ]).pipe(
-    tap((_) => {
-      this.onSetSortControls();
-      this.onSetPriceControls();
-    })
-  );
+  ]);
 
   readonly categoryDetails$: Observable<CategoryModel> = this.categoryId$.pipe(
     switchMap((categoryId) => this._categoriesService.getSingleCategoryById(categoryId))
@@ -103,7 +103,7 @@ export class CategoryProductsComponent implements AfterViewInit {
         })
         .filter((product) => (params.priceFrom ? product.price >= params.priceFrom : true))
         .filter((product) => (params.priceTo ? product.price <= params.priceTo : true))
-        .filter((product) => (params['minRating'] ? product.ratingValue >= +params['minRating'] : true))
+        .filter((product) => (params.minRating ? product.ratingValue >= +params.minRating : true))
         .filter((product) =>
           params.stores
             ? product.storeIds.find((storeId) => params.stores?.has(storeId)) || params.stores.size == 0
@@ -117,8 +117,12 @@ export class CategoryProductsComponent implements AfterViewInit {
 
   readonly productsPaginated$: Observable<ProductQueryModel[]> = combineLatest([
     this.productsFilteredAndSorted$,
-    this.queryParams$
-  ]).pipe(map(([products, params]) => products.slice((params.page - 1) * params.limit, params.page * params.limit)));
+    this.paginator$
+  ]).pipe(
+    map(([products, paginator]) =>
+      products.slice((paginator.page - 1) * paginator.limit, paginator.page * paginator.limit)
+    )
+  );
 
   readonly limitOpts: Observable<number[]> = of([5, 10, 15]);
 
@@ -205,6 +209,16 @@ export class CategoryProductsComponent implements AfterViewInit {
       .subscribe();
   }
 
+  onSetStoresControls(): void {
+    combineLatest([this.storeList$, this.queryParams$.pipe(take(1))]).pipe(
+      tap(([stores, params]) => {
+        stores.forEach((store) =>
+          this.storesForm.patchValue({ [store.id]: params.stores.has(store.id) ? true : false })
+        );
+      })
+    );
+  }
+
   calcNumberOfPages(products: ProductQueryModel[]): void {
     this.queryParams$
       .pipe(
@@ -254,8 +268,10 @@ export class CategoryProductsComponent implements AfterViewInit {
       .pipe(
         take(1),
         tap((params) => {
+          console.log('pagination checked');
           const stores: Set<string> = params.stores;
           if (params.page > Math.ceil(products.length / params.limit)) {
+            this._paginatorSubject.next({ limit: params.limit, page: params.page });
             this._router.navigate([], {
               queryParams: Object.assign({}, params, {
                 page: Math.max(1, Math.ceil(products.length / params.limit)),
@@ -274,8 +290,7 @@ export class CategoryProductsComponent implements AfterViewInit {
       queryParams: Object.assign({}, params, {
         minRating: rating == params.minRating ? null : rating,
         stores: this.convertToStoreParams(stores)
-      }),
-      replaceUrl: true
+      })
     });
   }
 
@@ -287,8 +302,7 @@ export class CategoryProductsComponent implements AfterViewInit {
         priceTo: null,
         minRating: null,
         stores: this.convertToStoreParams(stores)
-      }),
-      replaceUrl: true
+      })
     });
   }
 
@@ -302,16 +316,15 @@ export class CategoryProductsComponent implements AfterViewInit {
     this._isFilterShownSubject.next(false);
   }
   onStoresCreateFormControls(stores: StoreModel[]): void {
-    this.queryParams$
-      .pipe(
-        take(1),
-        tap((params) => {
-          stores.forEach((store) =>
-            this.storesForm.addControl(store.id, new FormControl(params.stores.has(store.id) ? true : false))
-          );
-        })
-      )
-      .subscribe();
+    stores.forEach((store) => this.storesForm.addControl(store.id, new FormControl(false)));
+  }
+  setPaginatorOnQueryParams(page: number, limit: number): void {
+    this._paginatorSubject.next({ page: page, limit: limit });
+  }
+  ngOnInit(): void {
+    this.onSetSortControls();
+    this.onSetPriceControls();
+    this.onSetStoresControls();
   }
   ngAfterViewInit(): void {
     combineLatest([
@@ -327,8 +340,7 @@ export class CategoryProductsComponent implements AfterViewInit {
                   sort: sortArray[0],
                   order: sortArray[1],
                   stores: this.convertToStoreParams(stores)
-                }),
-                replaceUrl: true
+                })
               });
             })
           )
@@ -348,8 +360,7 @@ export class CategoryProductsComponent implements AfterViewInit {
                     filterValues.priceFrom && filterValues.priceFrom.length > 0 ? filterValues.priceFrom : null,
                   priceTo: filterValues.priceTo && filterValues.priceTo.length > 0 ? filterValues.priceTo : null,
                   stores: this.convertToStoreParams(stores)
-                }),
-                replaceUrl: true
+                })
               });
             })
           )
@@ -373,8 +384,7 @@ export class CategoryProductsComponent implements AfterViewInit {
               this._router.navigate([], {
                 queryParams: Object.assign({}, params, {
                   stores: storesArray.length > 0 ? storesArray.join(',') : null
-                }),
-                replaceUrl: true
+                })
               });
             })
           )
