@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { Observable, combineLatest, of } from 'rxjs';
-import { map, shareReplay, switchMap } from 'rxjs/operators';
+import { filter, map, shareReplay, switchMap } from 'rxjs/operators';
+import { Router } from '@angular/router';
 import { CategoryModel } from '../../models/category.model';
 import { TagModel } from '../../models/tag.model';
 import { StoreQueryModel } from '../../query-models/store.query-model';
@@ -48,7 +49,8 @@ export class HomeComponent {
     private _categoriesService: CategoriesService,
     private _storesService: StoresService,
     private _tagsService: TagsService,
-    private _productsService: ProductsService
+    private _productsService: ProductsService,
+    private _router: Router
   ) {}
 
   mapToStoreQueryModel(tagsMap: Record<string, TagModel>, stores: StoreModel[]): StoreQueryModel[] {
@@ -59,6 +61,10 @@ export class HomeComponent {
       logoUrl: store.logoUrl,
       tags: (store.tagIds ?? []).map((tagId) => tagsMap[tagId]?.name)
     }));
+  }
+
+  onCategoryChanged(categoryId: string): void {
+    this._router.navigate(['/categories/' + categoryId]);
   }
 
   mapToFeaturedCategoryQueryModel(
