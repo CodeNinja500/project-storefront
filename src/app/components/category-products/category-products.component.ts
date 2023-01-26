@@ -25,6 +25,7 @@ import { ProductModel } from '../../models/product.model';
 export class CategoryProductsComponent implements AfterViewInit, OnInit {
   private _isFilterShownSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public isFilterShown$: Observable<boolean> = this._isFilterShownSubject.asObservable();
+
   readonly categoryList$: Observable<CategoryModel[]> = this._categoriesService.getAllCategories().pipe(shareReplay(1));
   readonly categoryId$: Observable<string> = this._activatedRoute.params.pipe(
     map((params) => params['categoryId']),
@@ -41,8 +42,9 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
       minRating: params['minRating'] ?? null,
       stores: params['stores'] ? new Set<string>(params['stores'].split(',')) : new Set<string>([])
     })),
-    shareReplay(1),
-    tap((data) => this.setPaginatorOnQueryParams(data.page, data.limit))
+
+    tap((data) => this.setPaginatorOnQueryParams(data.page, data.limit)),
+    shareReplay(1)
   );
 
   private _paginatorSubject: ReplaySubject<PaginatorModel> = new ReplaySubject<PaginatorModel>(1);
@@ -110,9 +112,10 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
             : true
         )
     ),
-    shareReplay(1),
+
     tap((data) => this.calcNumberOfPages(data)),
-    tap((data) => this.checkPaginationAfterFilterAdded(data))
+    tap((data) => this.checkPaginationAfterFilterAdded(data)),
+    shareReplay(1)
   );
 
   readonly productsPaginated$: Observable<ProductQueryModel[]> = combineLatest([
@@ -327,8 +330,8 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
     this.onSetStoresControls();
   }
   ngAfterViewInit(): void {
-    combineLatest([
-      this.sortForm.valueChanges.pipe(
+    this.sortForm.valueChanges
+      .pipe(
         switchMap((sortValue) =>
           this.queryParams$.pipe(
             take(1),
@@ -345,8 +348,10 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
             })
           )
         )
-      ),
-      this.filterForm.valueChanges.pipe(
+      )
+      .subscribe();
+    this.filterForm.valueChanges
+      .pipe(
         debounceTime(500),
         tap((filterValue) => {}),
         switchMap((filterValues) =>
@@ -365,9 +370,13 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
             })
           )
         )
-      ),
-      this.storesForm.valueChanges.pipe(
-        tap((storesValue) => {}),
+      )
+      .subscribe();
+    this.storesForm.valueChanges
+      .pipe(
+        tap((storesValue) => {
+          console.log('stores value changed');
+        }),
         switchMap((storesValue) =>
           this.queryParams$.pipe(
             take(1),
@@ -390,6 +399,6 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
           )
         )
       )
-    ]).subscribe();
+      .subscribe();
   }
 }
