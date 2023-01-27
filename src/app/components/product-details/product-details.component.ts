@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, combineLatest } from 'rxjs';
 import { map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
@@ -9,6 +9,7 @@ import { CategoriesService } from '../../services/categories.service';
 import { StoresService } from '../../services/stores.service';
 import { CategoryModel } from 'src/app/models/category.model';
 import { StoreModel } from 'src/app/models/store.model';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-product-details',
@@ -16,15 +17,18 @@ import { StoreModel } from 'src/app/models/store.model';
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProductDetailsComponent {
-  readonly shopId$: Observable<string | undefined> = this._activatedRoute.queryParams.pipe(
-    map((params) => params['store'])
+export class ProductDetailsComponent implements AfterViewInit {
+  readonly storeId$: Observable<string> = this._activatedRoute.queryParams.pipe(
+    map((params) => params['store'] ?? ' '),
+    shareReplay(1)
   );
   readonly productId$: Observable<string> = this._activatedRoute.params.pipe(
     map((params) => params['productId']),
     shareReplay(1)
   );
   readonly productAllList$: Observable<ProductModel[]> = this._productsService.getAllProducts();
+
+  readonly storeSelectControl: FormControl = new FormControl();
 
   readonly productDetails$: Observable<ProductDetailsQueryModel> = combineLatest([
     this._storesService.getStoresMap(),
@@ -52,6 +56,17 @@ export class ProductDetailsComponent {
     private _storesService: StoresService
   ) {}
 
+  setStoreControl(): void {
+    this.storeId$
+      .pipe(
+        take(1),
+        tap((storeId) => {
+          if (storeId) this.storeSelectControl.setValue(storeId);
+        })
+      )
+      .subscribe();
+  }
+
   mapToProductDetailsQueryModel(
     product: ProductModel,
     category: CategoryModel,
@@ -74,5 +89,8 @@ export class ProductDetailsComponent {
         .map((storeId) => storeMap[storeId] ?? [])
         .map((store) => ({ id: store.id, name: store.name }))
     };
+  }
+  ngAfterViewInit(): void {
+    this.setStoreControl();
   }
 }
