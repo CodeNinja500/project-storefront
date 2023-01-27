@@ -25,6 +25,7 @@
                     </div>
                     <div class="col-12 mb-3">
                         <div class="mb-4" *ngIf="storeId$|async">
+
                             <ng-container *ngIf="isInStoreFromQueryParams$|async ; else notInTheStore">
                             </ng-container>
                             <ng-template #notInTheStore>
@@ -34,7 +35,8 @@
                         </div>
                         <label class="form-label" for="selectOne">Select store</label>
                         <select class="form-select" aria-label="Default select example" [formControl]='storeSelectControl'>
-                            <option *ngFor="let store of product.stores" [value]="store.id">{{store.name}}
+                            <option *ngFor="let store of product.stores" [value]="store.id" (click)='onStoreClickedResetWarning()'>
+                                {{store.name}}
                             </option>
                         </select>
                     </div>

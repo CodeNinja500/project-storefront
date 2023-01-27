@@ -22,6 +22,7 @@ export class ProductDetailsComponent implements AfterViewInit {
     map((params) => params['store'] ?? null),
     shareReplay(1)
   );
+
   readonly productId$: Observable<string> = this._activatedRoute.params.pipe(
     map((params) => params['productId']),
     shareReplay(1)
@@ -72,7 +73,7 @@ export class ProductDetailsComponent implements AfterViewInit {
                   this.storeSelectControl.setValue(storeId);
                 } else {
                   this._isInStoreFromQueryParamsSubject.next(false);
-                  this.storeSelectControl.setValue(productDetails.stores[0].id);
+                  // this.storeSelectControl.setValue(productDetails.stores[0].id);
                 }
               } else {
                 this.storeSelectControl.setValue(productDetails.stores[0].id);
@@ -82,6 +83,9 @@ export class ProductDetailsComponent implements AfterViewInit {
         )
       )
       .subscribe();
+  }
+  onStoreClickedResetWarning(): void {
+    this._isInStoreFromQueryParamsSubject.next(true);
   }
 
   mapToProductDetailsQueryModel(
