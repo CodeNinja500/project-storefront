@@ -51,11 +51,11 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
   public paginator$: Observable<PaginatorModel> = this._paginatorSubject.asObservable();
 
   readonly ratingOptions$: Observable<RatingQueryModel[]> = of([
-    { value: 5, stars: this.mapRatingNumberToStars(5) },
-    { value: 4, stars: this.mapRatingNumberToStars(4) },
-    { value: 3, stars: this.mapRatingNumberToStars(3) },
-    { value: 2, stars: this.mapRatingNumberToStars(2) },
-    { value: 1, stars: this.mapRatingNumberToStars(1) }
+    { value: 5, stars: this._productsService.mapRatingNumberToStars(5) },
+    { value: 4, stars: this._productsService.mapRatingNumberToStars(4) },
+    { value: 3, stars: this._productsService.mapRatingNumberToStars(3) },
+    { value: 2, stars: this._productsService.mapRatingNumberToStars(2) },
+    { value: 1, stars: this._productsService.mapRatingNumberToStars(1) }
   ]);
 
   readonly sortingOpts$: Observable<SortOptionModel[]> = of([
@@ -169,24 +169,8 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
       ratingCount: product.ratingCount,
       ratingValue: product.ratingValue,
       storeIds: product.storeIds,
-      ratingStars: this.mapRatingNumberToStars(product.ratingValue)
+      ratingStars: this._productsService.mapRatingNumberToStars(product.ratingValue)
     };
-  }
-
-  mapRatingNumberToStars(rating: number): number[] {
-    const ratingRounded = Math.round(rating * 2) / 2;
-    const starsArray = Array.from(Array(5).keys()).map((n) => {
-      if (n < Math.floor(ratingRounded)) {
-        return 1;
-      }
-      if (n == Math.floor(ratingRounded)) {
-        if (ratingRounded - Math.floor(ratingRounded) >= 0.5) return 0.5;
-        else return 0;
-      } else {
-        return 0;
-      }
-    });
-    return starsArray;
   }
 
   onSetSortControls(): void {
