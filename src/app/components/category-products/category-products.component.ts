@@ -271,7 +271,6 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
       .pipe(
         take(1),
         tap((params) => {
-          console.log('pagination checked');
           const stores: Set<string> = params.stores;
           if (params.page > Math.ceil(products.length / params.limit)) {
             this._paginatorSubject.next({ limit: params.limit, page: params.page });
@@ -319,7 +318,16 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
     this._isFilterShownSubject.next(false);
   }
   onStoresCreateFormControls(stores: StoreModel[]): void {
-    stores.forEach((store) => this.storesForm.addControl(store.id, new FormControl(false)));
+    this.queryParams$
+      .pipe(
+        take(1),
+        tap((params) => {
+          stores.forEach((store) =>
+            this.storesForm.addControl(store.id, new FormControl(params.stores.has(store.id) ? true : false))
+          );
+        })
+      )
+      .subscribe();
   }
   setPaginatorOnQueryParams(page: number, limit: number): void {
     this._paginatorSubject.next({ page: page, limit: limit });
@@ -374,9 +382,7 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
       .subscribe();
     this.storesForm.valueChanges
       .pipe(
-        tap((storesValue) => {
-          console.log('stores value changed');
-        }),
+        tap((storesValue) => {}),
         switchMap((storesValue) =>
           this.queryParams$.pipe(
             take(1),
