@@ -1,15 +1,15 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, combineLatest } from 'rxjs';
+import { Observable, ReplaySubject, combineLatest } from 'rxjs';
 import { map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
 import { ProductModel } from '../../models/product.model';
 import { ProductDetailsQueryModel } from '../../query-models/product-details.query-model';
 import { ProductsService } from '../../services/products.service';
 import { CategoriesService } from '../../services/categories.service';
 import { StoresService } from '../../services/stores.service';
-import { CategoryModel } from 'src/app/models/category.model';
-import { StoreModel } from 'src/app/models/store.model';
-import { FormControl } from '@angular/forms';
+import { CategoryModel } from '../../models/category.model';
+import { StoreModel } from '../../models/store.model';
 
 @Component({
   selector: 'app-product-details',
@@ -18,8 +18,8 @@ import { FormControl } from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductDetailsComponent implements AfterViewInit {
-  readonly storeId$: Observable<string> = this._activatedRoute.queryParams.pipe(
-    map((params) => params['store'] ?? ' '),
+  readonly storeId$: Observable<string | undefined> = this._activatedRoute.queryParams.pipe(
+    map((params) => params['store'] ?? null),
     shareReplay(1)
   );
   readonly productId$: Observable<string> = this._activatedRoute.params.pipe(
@@ -47,8 +47,12 @@ export class ProductDetailsComponent implements AfterViewInit {
             )
           )
         )
-    )
+    ),
+    shareReplay(1)
   );
+  private _isInStoreFromQueryParamsSubject: ReplaySubject<boolean> = new ReplaySubject<boolean>();
+  public isInStoreFromQueryParams$: Observable<boolean> = this._isInStoreFromQueryParamsSubject.asObservable();
+
   constructor(
     private _activatedRoute: ActivatedRoute,
     private _productsService: ProductsService,
@@ -59,10 +63,23 @@ export class ProductDetailsComponent implements AfterViewInit {
   setStoreControl(): void {
     this.storeId$
       .pipe(
-        take(1),
-        tap((storeId) => {
-          if (storeId) this.storeSelectControl.setValue(storeId);
-        })
+        switchMap((storeId) =>
+          this.productDetails$.pipe(
+            tap((productDetails) => {
+              if (storeId) {
+                if (productDetails.stores.find((store) => store.id == storeId)) {
+                  this._isInStoreFromQueryParamsSubject.next(true);
+                  this.storeSelectControl.setValue(storeId);
+                } else {
+                  this._isInStoreFromQueryParamsSubject.next(false);
+                  this.storeSelectControl.setValue(productDetails.stores[0].id);
+                }
+              } else {
+                this.storeSelectControl.setValue(productDetails.stores[0].id);
+              }
+            })
+          )
+        )
       )
       .subscribe();
   }

@@ -1,5 +1,5 @@
 <section class="my-lg-2 my-2" *ngIf="productDetails$|async as product">
-    <div class="container" *ngIf="storeId$|async as storeId">
+    <div class="container">
         <div class="row">
             <div class="col-md-6">
                 <img [src]="product.imgUrl" class='w-100'>
@@ -23,14 +23,21 @@
                     <div class="col-12 mb-6">
                         <h3 class="mb-1">{{product.price|currency}}</h3>
                     </div>
-                    <div class="mb-3">
+                    <div class="col-12 mb-3">
+                        <div class="mb-4" *ngIf="storeId$|async">
+                            <ng-container *ngIf="isInStoreFromQueryParams$|async ; else notInTheStore">
+                            </ng-container>
+                            <ng-template #notInTheStore>
+                                <h6><span class="text-danger">Sorry, there are no such products in this store... Choose a different
+                                        one!</span></h6>
+                            </ng-template>
+                        </div>
                         <label class="form-label" for="selectOne">Select store</label>
-                        <select class="form-select" aria-label="Default select example">
-                            <option *ngFor="let store of product.stores" [value]="store.id" [selected]='store.id==storeId'>{{store.name}}
+                        <select class="form-select" aria-label="Default select example" [formControl]='storeSelectControl'>
+                            <option *ngFor="let store of product.stores" [value]="store.id">{{store.name}}
                             </option>
                         </select>
                     </div>
-
                 </div>
             </div>
         </div>
