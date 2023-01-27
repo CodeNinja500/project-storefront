@@ -51,11 +51,11 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
   public paginator$: Observable<PaginatorModel> = this._paginatorSubject.asObservable();
 
   readonly ratingOptions$: Observable<RatingQueryModel[]> = of([
-    { value: 5, stars: this.mapRatingNumberToStars(5) },
-    { value: 4, stars: this.mapRatingNumberToStars(4) },
-    { value: 3, stars: this.mapRatingNumberToStars(3) },
-    { value: 2, stars: this.mapRatingNumberToStars(2) },
-    { value: 1, stars: this.mapRatingNumberToStars(1) }
+    { value: 5, stars: this._productsService.mapRatingNumberToStars(5) },
+    { value: 4, stars: this._productsService.mapRatingNumberToStars(4) },
+    { value: 3, stars: this._productsService.mapRatingNumberToStars(3) },
+    { value: 2, stars: this._productsService.mapRatingNumberToStars(2) },
+    { value: 1, stars: this._productsService.mapRatingNumberToStars(1) }
   ]);
 
   readonly sortingOpts$: Observable<SortOptionModel[]> = of([
@@ -129,7 +129,7 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
 
   readonly limitOpts: Observable<number[]> = of([5, 10, 15]);
 
-  private _pagesSubject: Subject<number[]> = new Subject<number[]>();
+  private _pagesSubject: ReplaySubject<number[]> = new ReplaySubject<number[]>(1);
   public pages$: Observable<number[]> = this._pagesSubject.asObservable();
 
   readonly filterForm: FormGroup = new FormGroup({ priceFrom: new FormControl(), priceTo: new FormControl() });
@@ -169,24 +169,8 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
       ratingCount: product.ratingCount,
       ratingValue: product.ratingValue,
       storeIds: product.storeIds,
-      ratingStars: this.mapRatingNumberToStars(product.ratingValue)
+      ratingStars: this._productsService.mapRatingNumberToStars(product.ratingValue)
     };
-  }
-
-  mapRatingNumberToStars(rating: number): number[] {
-    const ratingRounded = Math.round(rating * 2) / 2;
-    const starsArray = Array.from(Array(5).keys()).map((n) => {
-      if (n < Math.floor(ratingRounded)) {
-        return 1;
-      }
-      if (n == Math.floor(ratingRounded)) {
-        if (ratingRounded - Math.floor(ratingRounded) >= 0.5) return 0.5;
-        else return 0;
-      } else {
-        return 0;
-      }
-    });
-    return starsArray;
   }
 
   onSetSortControls(): void {
@@ -271,9 +255,8 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
       .pipe(
         take(1),
         tap((params) => {
-          console.log('pagination checked');
           const stores: Set<string> = params.stores;
-          if (params.page > Math.ceil(products.length / params.limit)) {
+          if (params.page > Math.max(1, Math.ceil(products.length / params.limit))) {
             this._paginatorSubject.next({ limit: params.limit, page: params.page });
             this._router.navigate([], {
               queryParams: Object.assign({}, params, {
@@ -319,7 +302,16 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
     this._isFilterShownSubject.next(false);
   }
   onStoresCreateFormControls(stores: StoreModel[]): void {
-    stores.forEach((store) => this.storesForm.addControl(store.id, new FormControl(false)));
+    this.queryParams$
+      .pipe(
+        take(1),
+        tap((params) => {
+          stores.forEach((store) =>
+            this.storesForm.addControl(store.id, new FormControl(params.stores.has(store.id) ? true : false))
+          );
+        })
+      )
+      .subscribe();
   }
   setPaginatorOnQueryParams(page: number, limit: number): void {
     this._paginatorSubject.next({ page: page, limit: limit });
@@ -374,9 +366,7 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
       .subscribe();
     this.storesForm.valueChanges
       .pipe(
-        tap((storesValue) => {
-          console.log('stores value changed');
-        }),
+        tap((storesValue) => {}),
         switchMap((storesValue) =>
           this.queryParams$.pipe(
             take(1),

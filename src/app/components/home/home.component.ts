@@ -67,6 +67,10 @@ export class HomeComponent {
     this._router.navigate(['/categories/' + categoryId]);
   }
 
+  onProductSelected(productId: string): void {
+    this._router.navigate(['/products/' + productId]);
+  }
+
   mapToFeaturedCategoryQueryModel(
     categoryIds: string[],
     products: ProductModel[],

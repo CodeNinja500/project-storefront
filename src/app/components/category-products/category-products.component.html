@@ -77,7 +77,6 @@
                     </ng-container>
                     <section class="my-lg-2 my-1">
                         <ng-container *ngIf="productsFilteredAndSorted$|async as productsBeforePagination">
-
                             <div class="container" *ngIf="productsPaginated$ | async as products">
                                 <div class="row">
                                     <div class="col-12 d-flex justify-content-between align-items-center flex-wrap">
@@ -104,9 +103,10 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <!--PRODUCT LIST-->
                                     <div class='row g-4 row-cols-1 mt2'>
                                         <div *ngFor="let product of products" class="col-12">
-                                            <div class="card card-product">
+                                            <div class="card card-product" [routerLink]="'/products/'+ product.id">
                                                 <div class="card-body">
                                                     <div class="row align-items-center">
                                                         <div class='col-12 col-md-4'>
