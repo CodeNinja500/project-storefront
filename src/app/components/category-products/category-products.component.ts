@@ -129,7 +129,7 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
 
   readonly limitOpts: Observable<number[]> = of([5, 10, 15]);
 
-  private _pagesSubject: Subject<number[]> = new Subject<number[]>();
+  private _pagesSubject: ReplaySubject<number[]> = new ReplaySubject<number[]>(1);
   public pages$: Observable<number[]> = this._pagesSubject.asObservable();
 
   readonly filterForm: FormGroup = new FormGroup({ priceFrom: new FormControl(), priceTo: new FormControl() });
@@ -256,7 +256,7 @@ export class CategoryProductsComponent implements AfterViewInit, OnInit {
         take(1),
         tap((params) => {
           const stores: Set<string> = params.stores;
-          if (params.page > Math.ceil(products.length / params.limit)) {
+          if (params.page > Math.max(1, Math.ceil(products.length / params.limit))) {
             this._paginatorSubject.next({ limit: params.limit, page: params.page });
             this._router.navigate([], {
               queryParams: Object.assign({}, params, {
