@@ -17,6 +17,9 @@ import { StoreModel } from 'src/app/models/store.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductDetailsComponent {
+  readonly shopId$: Observable<string | undefined> = this._activatedRoute.queryParams.pipe(
+    map((params) => params['store'])
+  );
   readonly productId$: Observable<string> = this._activatedRoute.params.pipe(
     map((params) => params['productId']),
     shareReplay(1)

@@ -58,7 +58,7 @@
             </div>
             <div class='row row-cols-2 row-cols-xl-6 row-cols-md-3 g-4'>
                 <div *ngFor="let product of productsInStoreList$ | async" class="col">
-                    <a [routerLink]="" class="text-decoration-none text-inherit">
+                    <a [routerLink]="'/products/'+product.id" [queryParams]="{store: store.id}" class="text-decoration-none text-inherit">
                         <!-- card -->
                         <div>
                             <div class="card-body text-center py-4">
