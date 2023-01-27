@@ -1,0 +1,31 @@
+<section class="my-lg-2 my-2" *ngIf="productDetails$|async as product">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <img [src]="product.imgUrl" class='w-100'>
+            </div>
+            <div class='col-md-6'>
+                <div class="col-12">
+                    <div class="col-12 mb-4 my-12">
+                        <h6><span class="text-primary">{{product.category.name}}</span></h6>
+                    </div>
+                    <div class="col-12 mb-6">
+                        <h2 class="mb-1">{{product.name}}</h2>
+                    </div>
+                    <div class="col-12 mb-4">
+                        <h6>
+                            <small class="text-warning"> <i *ngFor="let val of product.ratingStars" class="bi"
+                                    [ngClass]="{'bi-star-fill': val === 1, 'bi-star': val === 0, 'bi-star-half': val === 0.5}"></i>
+                            </small>
+                            <span class="text-primary ms-3">({{product.ratingCount}} reviews)</span>
+                        </h6>
+                    </div>
+                    <div class="col-12 mb-6">
+                        <h3 class="mb-1">{{product.price|currency}}</h3>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -7,6 +7,7 @@ export interface ProductDetailsQueryModel {
     name: string;
   };
   readonly ratingValue: number;
+  readonly ratingStars: number[];
   readonly ratingCount: number;
   readonly imgUrl: string;
   readonly featureValue: number;
